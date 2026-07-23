@@ -10,6 +10,8 @@ from google.auth.transport import requests as google_requests
 # Initialize application environmental constraints
 load_dotenv()
 
+
+
 app = Flask(__name__, template_folder='../templates')
 app.secret_key = os.environ.get("SECRET_KEY", "unimatch-secret-key-2026")
 
