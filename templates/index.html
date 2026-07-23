@@ -1,1007 +1,420 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniMatch AI - Higher-Ed Admissions Alignment Matrix</title>
+    <title>UniMatch AI - Higher Education Profile Matcher & Predictive Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .theme-transition {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .glow-indigo {
-            box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.25);
-        }
-        .glow-emerald {
-            box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.25);
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #090d16;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #334155;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans theme-transition antialiased selection:bg-indigo-500 selection:text-white" id="app-body">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased">
 
-    <div id="landing-page" class="block transition-all duration-500">
-        <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-indigo-500/30">
-                        U
-                    </div>
-                    <div>
-                        <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">UniMatch</span>
-                        <span class="text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full ml-1.5">AI</span>
-                    </div>
+    <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-graduation-cap"></i>
                 </div>
+                <div>
+                    <span class="font-extrabold text-lg text-white tracking-wide">UniMatch <span class="text-indigo-400">AI</span></span>
+                    <span class="block text-xs text-slate-400">Predictive Higher-Ed Engine</span>
+                </div>
+            </div>
 
-                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-                    <a href="#landing-features" class="hover:text-white transition-colors">Features</a>
-                    <a href="#landing-matrix" class="hover:text-white transition-colors">Matrix Engine</a>
-                    <a href="#landing-institutional" class="hover:text-white transition-colors">Institutions</a>
-                    <a href="#landing-stats" class="hover:text-white transition-colors">Analytics</a>
-                </nav>
-
-                <div class="flex items-center gap-3">
-                    <button onclick="openAuthModal('login')" class="text-xs font-bold text-slate-300 hover:text-white px-4 py-2.5 rounded-xl transition hover:bg-slate-900 border border-transparent">
+            <div class="flex items-center space-x-4">
+                <div id="auth-unauthenticated" class="flex items-center space-x-3">
+                    <button onclick="openAuthModal('signin')" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition">
                         Sign In
                     </button>
-                    <button onclick="openAuthModal('signup')" class="text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center gap-2">
-                        <span>Get Started</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <button onclick="openAuthModal('signup')" class="px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-600/30 transition">
+                        Get Started
+                    </button>
+                </div>
+                <div id="auth-authenticated" class="hidden items-center space-x-3">
+                    <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white uppercase">
+                            U
+                        </div>
+                        <span id="user-display-name" class="text-sm font-medium text-slate-200">User</span>
+                    </div>
+                    <button onclick="handleLogout()" class="text-slate-400 hover:text-rose-400 p-2 text-sm transition" title="Log Out">
+                        <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
             </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <header class="text-center max-w-3xl mx-auto space-y-3">
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
+                AI-Powered <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Higher Education Matching</span>
+            </h1>
+            <p class="text-slate-400 text-base sm:text-lg">
+                Utilizing LLM inference and proportional dynamic matrix evaluations to match applicants and institutions seamlessly.
+            </p>
         </header>
 
-        <section class="relative overflow-hidden py-24 lg:py-32 border-b border-slate-900">
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950 -z-10"></div>
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold mb-8 backdrop-blur-md">
-                    <span class="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                    <span>Powered by Llama 3.1 & Admissions Analytics</span>
-                </div>
-
-                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-4xl mx-auto leading-[1.1]">
-                    Architect Your Higher-Ed <span class="bg-gradient-to-r from-indigo-400 via-violet-300 to-emerald-400 bg-clip-text text-transparent">Admissions Matrix</span>
-                </h1>
-
-                <p class="mt-6 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                    Data-driven alignment algorithms connecting ambitious students with top-tier universities based on GPA baselines, standardized testing metrics, and holistic extracurricular DNA profiles.
-                </p>
-
-                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <button onclick="showApp()" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                        <span>Launch Matrix Dashboard</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </button>
-                    <button onclick="openAuthModal('signup')" class="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-sm rounded-2xl border border-slate-800 transition">
-                        Create Account
-                    </button>
-                </div>
-
-                <div class="mt-16 max-w-5xl mx-auto bg-slate-900/90 rounded-2xl border border-slate-800 p-4 shadow-2xl glow-indigo relative text-left backdrop-blur-xl">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 px-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
-                            <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                            <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-                        </div>
-                        <span class="text-[11px] font-mono text-slate-500">unimatch.ai/matrix/preview</span>
-                        <div class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">LIVE ENGINE</div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <div class="text-xs text-slate-400 font-semibold mb-1">Target Institution</div>
-                            <div class="text-base font-extrabold text-white">Massachusetts Institute of Technology</div>
-                            <div class="mt-3 flex items-center justify-between text-xs">
-                                <span class="text-slate-500">Unweighted GPA</span>
-                                <span class="font-bold text-slate-200">3.85 / 4.0</span>
-                            </div>
-                            <div class="mt-1 flex items-center justify-between text-xs">
-                                <span class="text-slate-500">SAT / ACT Index</span>
-                                <span class="font-bold text-slate-200">1460 / 32</span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <div class="text-xs text-slate-400 font-semibold mb-1">Calculated Fit Index</div>
-                            <div class="text-3xl font-black text-emerald-400">89.4%</div>
-                            <div class="text-[10px] text-emerald-300/80 mt-1 uppercase font-bold tracking-wider">TARGET MATCH CATEGORY</div>
-                        </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                            <div class="text-xs text-slate-400 font-semibold mb-1">Extracurricular DNA</div>
-                            <div class="flex flex-wrap gap-1.5 mt-2">
-                                <span class="text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">#STEM</span>
-                                <span class="text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">#Research</span>
-                                <span class="text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">#Innovation</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <section id="landing-features" class="py-20 border-b border-slate-900 bg-slate-950/50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-2xl mx-auto">
-                    <h2 class="text-xs font-bold text-indigo-400 uppercase tracking-widest">Intelligent Framework</h2>
-                    <p class="text-3xl font-extrabold text-white mt-2">Comprehensive Admissions Toolkit</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-14">
-                    <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl hover:border-slate-700 transition">
-                        <div class="w-12 h-12 bg-indigo-600/20 border border-indigo-500/30 rounded-xl flex items-center justify-center text-indigo-400 font-bold text-xl mb-6">🎯</div>
-                        <h3 class="text-lg font-bold text-white mb-2">Predictive Probability Matrix</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">Calculate exact safety, target, and reach match bounds using weighted quantitative test parameters and regional filters.</p>
-                    </div>
-
-                    <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl hover:border-slate-700 transition">
-                        <div class="w-12 h-12 bg-violet-600/20 border border-violet-500/30 rounded-xl flex items-center justify-center text-violet-400 font-bold text-xl mb-6">✨</div>
-                        <h3 class="text-lg font-bold text-white mb-2">LLM Profile Optimizer</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">Get dynamic, actionable recommendations generated by Llama 3.1 inference model to close metric gaps before application deadlines.</p>
-                    </div>
-
-                    <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-2xl hover:border-slate-700 transition">
-                        <div class="w-12 h-12 bg-emerald-600/20 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 font-bold text-xl mb-6">🛡️</div>
-                        <h3 class="text-lg font-bold text-white mb-2">Institutional Recruitment Radar</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">Empower admissions officers with high-yield talent pipeline search tools and an optional universal equity filter for bias-free evaluation.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="landing-stats" class="py-16 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-b border-slate-900">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                    <div>
-                        <div class="text-4xl font-black text-indigo-400">20+</div>
-                        <div class="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-wider">Top Institutions</div>
-                    </div>
-                    <div>
-                        <div class="text-4xl font-black text-emerald-400">100%</div>
-                        <div class="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-wider">Equity Neutral Filter</div>
-                    </div>
-                    <div>
-                        <div class="text-4xl font-black text-violet-400">&lt;100ms</div>
-                        <div class="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-wider">Inference Speed</div>
-                    </div>
-                    <div>
-                        <div class="text-4xl font-black text-white">3-Tier</div>
-                        <div class="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-wider">Match Scoring</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer class="py-8 bg-slate-950 text-slate-600 text-xs text-center border-t border-slate-900">
-            <div class="max-w-7xl mx-auto px-4">
-                <p>© 2026 UniMatch AI Framework. Built for US Higher-Education Admissions Optimization.</p>
-            </div>
-        </footer>
-    </div>
-
-    <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl glow-indigo relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition text-lg font-bold">✕</button>
-
-            <div class="text-center space-y-2 mb-6">
-                <div class="inline-flex items-center gap-2">
-                    <span class="text-2xl font-black tracking-tight text-indigo-500">UniMatch</span>
-                    <span class="text-xs font-bold bg-slate-800 px-2 py-0.5 rounded text-slate-400">AI</span>
-                </div>
-                <h3 class="text-xl font-bold text-white" id="auth-modal-title">Sign In to Your Workspace</h3>
-                <p class="text-xs text-slate-400">Access personalized admissions matrices and institutional radar.</p>
-            </div>
-
-            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-400"></i> Student Profile Matcher
+            </h2>
+            
+            <form id="student-match-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" onsubmit="event.preventDefault(); runStudentMatch();">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Email Address</label>
-                    <input type="email" required placeholder="name@domain.edu" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-sm">
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Unweighted GPA (4.0 Scale)</label>
+                    <input type="number" step="0.01" min="0" max="4.0" id="gpa" value="3.75" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
                 </div>
+
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</label>
-                    <input type="password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-sm">
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">SAT Score (400 - 1600)</label>
+                    <input type="number" step="10" min="400" max="1600" id="sat" value="1420" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
                 </div>
+
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Primary Role</label>
-                    <select class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500 text-sm">
-                        <option value="student">Prospective Student Candidate</option>
-                        <option value="institute">Higher-Ed Admissions Team</option>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">ACT Score (1 - 36)</label>
+                    <input type="number" min="1" max="36" id="act" value="31" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Target Major</label>
+                    <select id="major" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Business Administration">Business Administration</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Economics">Economics</option>
                     </select>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-indigo-600/30 mt-2">
-                    Continue to Dashboard
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Preferred Region</label>
+                    <select id="region" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                        <option value="Northeast">Northeast</option>
+                        <option value="West">West</option>
+                        <option value="Midwest">Midwest</option>
+                        <option value="South">South</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Campus Setting</label>
+                    <select id="campus_type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                        <option value="Urban">Urban</option>
+                        <option value="Suburban">Suburban</option>
+                        <option value="Rural">Rural</option>
+                    </select>
+                </div>
+
+                <div class="sm:col-span-2 lg:col-span-3">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Calculate University Matches
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="matches-results" class="hidden space-y-6">
+            <h3 class="text-xl font-bold text-white">Recommended University Targets</h3>
+            <div id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+    </main>
+
+    <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex border-b border-slate-800 mb-6">
+                <button id="tab-btn-signin" onclick="switchAuthTab('signin')" class="flex-1 pb-3 text-center text-sm font-semibold border-b-2 border-indigo-500 text-indigo-400">
+                    Sign In
+                </button>
+                <button id="tab-btn-signup" onclick="switchAuthTab('signup')" class="flex-1 pb-3 text-center text-sm font-semibold text-slate-400 hover:text-white border-b-2 border-transparent">
+                    Sign Up
+                </button>
+            </div>
+
+            <div id="auth-alert" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+            <form id="form-signin" class="space-y-4" onsubmit="handleEmailSignIn(event)">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+                    <input type="email" id="signin-email" required placeholder="student@university.edu" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="signin-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg shadow-lg shadow-indigo-600/30 transition">
+                    Sign In with Supabase
                 </button>
             </form>
 
-            <div class="mt-4 text-center">
-                <button onclick="showApp(); closeAuthModal();" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition">
-                    ⚡ Skip sign in and enter as Guest →
+            <form id="form-signup" class="space-y-4 hidden" onsubmit="handleEmailSignUp(event)">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" id="signup-name" required placeholder="Jane Doe" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+                    <input type="email" id="signup-email" required placeholder="student@university.edu" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="signup-password" required minlength="6" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg shadow-lg shadow-indigo-600/30 transition">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
+                <div class="relative flex justify-center text-xs text-slate-500 uppercase"><span class="bg-slate-900 px-2">Or continue with</span></div>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <div id="google-signin-btn"></div>
+                <button id="google-fallback-btn" onclick="handleGoogleFallback()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-3 transition {{ 'hidden' if google_client_id else '' }}">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                    Continue with Google
                 </button>
             </div>
         </div>
     </div>
 
-
-    <div id="app-workspace" class="hidden min-h-screen flex flex-col transition-all duration-500">
-        
-        <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
-            <div class="max-w-[1500px] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between mx-auto">
-                
-                <div class="flex items-center gap-4">
-                    <button onclick="showLanding()" class="text-xs font-semibold text-slate-400 hover:text-white bg-slate-950 hover:bg-slate-800 border border-slate-800 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                        <span>Landing</span>
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl font-black tracking-tight text-indigo-500 theme-transition" id="brand-logo">UniMatch</span>
-                        <span class="text-xs font-bold bg-slate-800 px-2 py-0.5 rounded text-slate-400">AI</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center bg-slate-950 p-1 rounded-full border border-slate-800 shadow-inner relative w-64 h-10 select-none cursor-pointer" onclick="switchViewPersona()">
-                    <div class="absolute top-1 left-1 bottom-1 w-[122px] bg-indigo-600 rounded-full theme-transition shadow-md" id="pill-indicator"></div>
-                    <div class="w-1/2 text-center text-xs font-bold z-10 theme-transition text-white" id="text-student">I am a Student</div>
-                    <div class="w-1/2 text-center text-xs font-bold z-10 theme-transition text-slate-400" id="text-institute">I am an Institute</div>
-                </div>
-
-            </div>
-        </header>
-
-        <div class="flex-1 max-w-[1500px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-                <aside id="app-sidebar" class="lg:col-span-4 xl:col-span-3 space-y-6 lg:sticky lg:top-24">
-                    
-                    <div id="sidebar-student-panel" class="bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
-                        <div class="border-b border-slate-800 pb-4">
-                            <h3 class="text-base font-extrabold text-slate-100 flex items-center gap-2">
-                                <span class="text-indigo-400">⚙️</span>
-                                <span>Academic Profile Data</span>
-                            </h3>
-                            <p class="text-xs text-slate-400 mt-1">Configure your baseline academic parameters to calculate matching matrices.</p>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">GPA (Unweighted 4.0 Scale)</label>
-                                <input type="number" id="student-gpa" step="0.01" min="0.0" max="4.0" value="3.85" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm font-semibold">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">SAT Score</label>
-                                    <input type="number" id="student-sat" min="400" max="1600" value="1460" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm font-semibold">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">ACT Score</label>
-                                    <input type="number" id="student-act" min="1" max="36" value="32" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm font-semibold">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Target Major</label>
-                                <select id="student-major" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm font-medium">
-                                    <option value="Computer Science">Computer Science</option>
-                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                                    <option value="Business Administration">Business Administration</option>
-                                    <option value="Biology">Biology</option>
-                                    <option value="Political Science">Political Science</option>
-                                    <option value="Economics">Economics</option>
-                                    <option value="Arts">Arts</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Preferred US Region</label>
-                                <select id="student-region" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm font-medium">
-                                    <option value="Northeast">Northeast</option>
-                                    <option value="West">West</option>
-                                    <option value="Midwest">Midwest</option>
-                                    <option value="South">South</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Campus Type</label>
-                                <select id="student-campus" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm font-medium">
-                                    <option value="Urban">Urban</option>
-                                    <option value="Suburban">Suburban</option>
-                                    <option value="Rural">Rural</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Extracurricular DNA Archetypes</label>
-                                <div class="flex flex-wrap gap-2" id="student-dna-container">
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="STEM" onclick="toggleDnaChip(this)">#STEM</span>
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Leadership" onclick="toggleDnaChip(this)">#Leadership</span>
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Community Service" onclick="toggleDnaChip(this)">#Community Service</span>
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Arts" onclick="toggleDnaChip(this)">#Arts</span>
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Athletics" onclick="toggleDnaChip(this)">#Athletics</span>
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="First-Gen" onclick="toggleDnaChip(this)">#First-Gen</span>
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Research" onclick="toggleDnaChip(this)">#Research</span>
-                                    <span class="dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Innovation" onclick="toggleDnaChip(this)">#Innovation</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button onclick="calculateStudentMatches()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2">
-                            <span>Execute Matching Framework</span>
-                        </button>
-                    </div>
-
-                    <div id="sidebar-institute-panel" class="hidden bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
-                        <div class="border-b border-slate-800 pb-4">
-                            <h3 class="text-base font-extrabold text-slate-100 flex items-center gap-2">
-                                <span class="text-emerald-400">📊</span>
-                                <span>Cohort Criteria Parameters</span>
-                            </h3>
-                            <p class="text-xs text-slate-400 mt-1">Set academic benchmarks to filter anonymized candidates.</p>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Academic Baseline Threshold (Min GPA)</label>
-                                <input type="number" id="inst-min-gpa" step="0.1" min="2.0" max="4.0" value="3.5" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 text-sm font-semibold">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Target Student DNA Priorities</label>
-                                <div class="flex flex-wrap gap-2" id="inst-dna-container">
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="STEM" onclick="toggleInstChip(this)">#STEM</span>
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Leadership" onclick="toggleInstChip(this)">#Leadership</span>
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Community Service" onclick="toggleInstChip(this)">#Community Service</span>
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Arts" onclick="toggleInstChip(this)">#Arts</span>
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Athletics" onclick="toggleInstChip(this)">#Athletics</span>
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="First-Gen" onclick="toggleInstChip(this)">#First-Gen</span>
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Research" onclick="toggleInstChip(this)">#Research</span>
-                                    <span class="inst-dna-chip px-3 py-1 bg-slate-800 text-xs rounded-full font-medium cursor-pointer transition select-none text-slate-300 border border-transparent hover:border-slate-700" data-tag="Innovation" onclick="toggleInstChip(this)">#Innovation</span>
-                                </div>
-                            </div>
-
-                            <div class="border-t border-slate-800 pt-4 flex items-center justify-between">
-                                <div class="pr-2">
-                                    <label class="block text-xs font-bold text-slate-200">Universal Equity Filter</label>
-                                    <span class="text-[11px] text-slate-400 block mt-0.5">Anonymizes candidates for absolute neutrality.</span>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                    <input type="checkbox" id="equity-filter-toggle" class="sr-only peer" onchange="runRecruitmentRadar()">
-                                    <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600 peer-checked:after:bg-white"></div>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="runRecruitmentRadar()" class="col-span-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20">
-                                Query Candidates
-                            </button>
-                            <button onclick="fetchOutreachStrategy()" class="col-span-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs transition border border-slate-700">
-                                Outreach Strategy
-                            </button>
-                        </div>
-                    </div>
-
-                </aside>
-
-
-                <main class="lg:col-span-8 xl:col-span-9 space-y-8">
-                    
-                    <div id="student-view-panel" class="space-y-8 block">
-                        
-                        <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950/60 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-xl">
-                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                                Admission Probability Matrix
-                            </h1>
-                            <p class="text-slate-400 mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed">
-                                Evaluate your target university alignment using continuous GPA calculations, standardized testing indexes, and qualitative extracurricular DNA footprint models.
-                            </p>
-                        </div>
-
-                        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl backdrop-blur-md">
-                            <div class="border-b border-slate-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <div>
-                                    <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
-                                        <span class="text-indigo-400">🎯</span>
-                                        <span>Single-College Admissions Deep-Dive</span>
-                                    </h3>
-                                    <p class="text-xs text-slate-400 mt-0.5">Select an institutional profile to evaluate match ratings and personalized, AI-driven action plans.</p>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                                <div class="sm:col-span-3">
-                                    <select id="predictor-college-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 text-xs font-medium">
-                                    </select>
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <button onclick="runSingleCollegePrediction()" class="w-full h-full min-h-[44px] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-600/20">
-                                        Analyze Chance
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div id="single-predict-results" class="hidden border-t border-slate-800/80 pt-5 space-y-4">
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-800 gap-4">
-                                    <div>
-                                        <h4 class="text-base font-extrabold text-white tracking-wide" id="predict-target-uni">MIT</h4>
-                                        <p class="text-xs text-slate-400 mt-1" id="predict-likelihood-text">Target Probability Matrix alignment status</p>
-                                    </div>
-                                    <div class="sm:text-right">
-                                        <span id="predict-tier-badge" class="px-3 py-1 text-[10px] font-black tracking-wide uppercase rounded-full bg-slate-800 text-slate-300 border border-slate-700">REACH MATCH</span>
-                                        <div class="text-xs font-black mt-2 text-slate-300" id="predict-match-score">Match Index: --</div>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="bg-emerald-950/20 border border-emerald-900/40 p-4 rounded-xl space-y-2">
-                                        <h5 class="text-[11px] font-extrabold text-emerald-400 uppercase tracking-wider">Identified Alignment Strengths</h5>
-                                        <ul id="predict-strengths" class="text-xs text-emerald-300/90 space-y-1.5 leading-relaxed">
-                                        </ul>
-                                    </div>
-                                    <div class="bg-rose-950/20 border border-rose-900/40 p-4 rounded-xl space-y-2">
-                                        <h5 class="text-[11px] font-extrabold text-rose-400 uppercase tracking-wider">Identified Academic & DNA Gaps</h5>
-                                        <ul id="predict-weaknesses" class="text-xs text-rose-300/90 space-y-1.5 leading-relaxed">
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="bg-indigo-950/30 border border-indigo-900/50 p-4 sm:p-5 rounded-xl space-y-2">
-                                    <h5 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wider">Tactical Action Plan</h5>
-                                    <div id="predict-recommendations" class="text-xs text-indigo-200/90 space-y-2 leading-relaxed whitespace-pre-line">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center gap-4 text-xs shadow-md">
-                            <div class="flex items-center gap-1.5 text-slate-400 font-bold uppercase tracking-wider">
-                                <span>⚡ Filters:</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-slate-400 font-medium">Region:</span>
-                                <select id="filter-region" onchange="applyAllFilters()" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-indigo-500 text-xs">
-                                    <option value="ALL">All Regions</option>
-                                    <option value="Northeast">Northeast</option>
-                                    <option value="West">West</option>
-                                    <option value="Midwest">Midwest</option>
-                                    <option value="South">South</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-slate-400 font-medium">Campus:</span>
-                                <select id="filter-campus" onchange="applyAllFilters()" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-indigo-500 text-xs">
-                                    <option value="ALL">All Campus Types</option>
-                                    <option value="Urban">Urban</option>
-                                    <option value="Suburban">Suburban</option>
-                                    <option value="Rural">Rural</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-slate-400 font-medium">Tier:</span>
-                                <select id="filter-tier" onchange="applyAllFilters()" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-indigo-500 text-xs">
-                                    <option value="ALL">All Tiers</option>
-                                    <option value="Safety">Safety</option>
-                                    <option value="Target">Target</option>
-                                    <option value="Reach">Reach</option>
-                                </select>
-                            </div>
-                            <button onclick="resetFilters()" class="ml-auto text-indigo-400 hover:text-indigo-300 font-bold tracking-wide transition text-xs">
-                                Clear Filters
-                            </button>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-extrabold text-slate-100">Bidirectional Alignment Streams</h3>
-                                <span class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full font-medium" id="student-match-count">0 Schools Computed</span>
-                            </div>
-
-                            <div id="student-advisor-box" class="hidden bg-indigo-950/40 border border-indigo-900/60 rounded-2xl p-5 text-xs text-indigo-200 space-y-2 shadow-lg">
-                                <div class="flex items-center gap-2 font-extrabold uppercase text-indigo-400 tracking-wider">
-                                    <span>✨ Profile Optimizer Advisor</span>
-                                </div>
-                                <p id="student-advisor-text" class="leading-relaxed"></p>
-                            </div>
-                            
-                            <div id="student-results-panel" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div class="col-span-1 md:col-span-2 text-center py-16 border border-slate-800/80 border-dashed rounded-2xl text-slate-500 bg-slate-900/30">
-                                    <p class="text-sm">No alignment streams loaded. Modify parameters and execute analysis matrix.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div id="institute-view-panel" class="space-y-8 hidden">
-                        
-                        <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/60 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-xl">
-                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                                Institutional Recruitment Radar
-                            </h1>
-                            <p class="text-slate-400 mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed">
-                                Define incoming student body profiles, evaluate anonymized talent cohorts, and execute outreach strategies with precision analytics.
-                            </p>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-extrabold text-slate-100">Anonymized Candidate Pipeline</h3>
-                                <span class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full font-medium" id="inst-candidate-count">0 Match Cohorts Found</span>
-                            </div>
-
-                            <div id="inst-advisor-box" class="hidden bg-emerald-950/40 border border-emerald-900/60 rounded-2xl p-5 text-xs text-emerald-200 space-y-2 shadow-lg">
-                                <div class="flex items-center gap-2 font-extrabold uppercase text-emerald-400 tracking-wider">
-                                    <span>📈 Strategic Outreach Insight</span>
-                                </div>
-                                <p id="inst-advisor-text" class="leading-relaxed"></p>
-                            </div>
-                            
-                            <div id="institute-results-panel" class="space-y-4 max-h-[750px] overflow-y-auto pr-1">
-                                <div class="text-center py-16 border border-slate-800/80 border-dashed rounded-2xl text-slate-500 bg-slate-900/30">
-                                    <p class="text-sm">Pipeline unpopulated. Execute alignment mapping query matrices in the sidebar.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </main>
-
-            </div>
-        </div>
-    </div>
-
-
     <script>
-        let currentScope = 'student';
-        let currentMatches = [];
+        const GOOGLE_CLIENT_ID = "{{ google_client_id or '' }}";
+        let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize default active DNA chips
-            document.querySelectorAll('.dna-chip[data-tag="STEM"], .dna-chip[data-tag="Leadership"]').forEach(el => toggleDnaChip(el));
-            document.querySelectorAll('.inst-dna-chip[data-tag="STEM"], .inst-dna-chip[data-tag="Research"]').forEach(el => toggleInstChip(el));
-            
-            populatePredictorColleges();
-            calculateStudentMatches();
+            initSession();
+            waitForGoogleSDK();
         });
 
-        // Landing & App Navigation View Switches
-        function showApp() {
-            document.getElementById('landing-page').classList.add('hidden');
-            document.getElementById('app-workspace').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function showLanding() {
-            document.getElementById('app-workspace').classList.add('hidden');
-            document.getElementById('landing-page').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function openAuthModal(mode) {
-            const modal = document.getElementById('auth-modal');
-            const title = document.getElementById('auth-modal-title');
-            if (mode === 'signup') {
-                title.innerText = "Create Your Free Account";
-            } else {
-                title.innerText = "Sign In to Your Workspace";
+        function waitForGoogleSDK(retriesLeft = 20) {
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+                initGoogleSDK();
+            } else if (GOOGLE_CLIENT_ID && retriesLeft > 0) {
+                setTimeout(() => waitForGoogleSDK(retriesLeft - 1), 150);
+            } else if (GOOGLE_CLIENT_ID) {
+                document.getElementById('google-fallback-btn').classList.remove('hidden');
             }
-            modal.classList.remove('hidden');
+        }
+
+        function initSession() {
+            const savedUser = localStorage.getItem('unimatch_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    updateAuthUI();
+                } catch (e) {
+                    localStorage.removeItem('unimatch_user');
+                }
+            }
+        }
+
+        function updateAuthUI() {
+            if (currentUser) {
+                document.getElementById('auth-unauthenticated').classList.add('hidden');
+                document.getElementById('auth-authenticated').classList.remove('hidden');
+                document.getElementById('auth-authenticated').classList.add('flex');
+                document.getElementById('user-display-name').textContent = currentUser.name || currentUser.email;
+                document.getElementById('user-avatar').textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+            } else {
+                document.getElementById('auth-unauthenticated').classList.remove('hidden');
+                document.getElementById('auth-authenticated').classList.add('hidden');
+            }
+        }
+
+        function openAuthModal(tab = 'signin') {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            switchAuthTab(tab);
         }
 
         function closeAuthModal() {
             document.getElementById('auth-modal').classList.add('hidden');
+            hideAlert();
         }
 
-        function handleAuthSubmit(event) {
-            event.preventDefault();
-            closeAuthModal();
-            showApp();
-        }
-
-        // Persona Switcher Controller
-        function switchViewPersona() {
-            const body = document.getElementById('app-body');
-            const pill = document.getElementById('pill-indicator');
-            const logo = document.getElementById('brand-logo');
-            const txtStudent = document.getElementById('text-student');
-            const txtInstitute = document.getElementById('text-institute');
-            
-            const studentPanel = document.getElementById('student-view-panel');
-            const institutePanel = document.getElementById('institute-view-panel');
-            
-            const sidebarStudent = document.getElementById('sidebar-student-panel');
-            const sidebarInstitute = document.getElementById('sidebar-institute-panel');
-
-            if (currentScope === 'student') {
-                currentScope = 'institute';
-                
-                body.classList.replace('bg-slate-950', 'bg-zinc-950');
-                pill.classList.replace('bg-indigo-600', 'bg-emerald-600');
-                pill.style.transform = 'translateX(116px)';
-                logo.classList.replace('text-indigo-500', 'text-emerald-500');
-                
-                txtStudent.classList.replace('text-white', 'text-slate-500');
-                txtInstitute.classList.replace('text-slate-400', 'text-white');
-                
-                studentPanel.classList.replace('block', 'hidden');
-                institutePanel.classList.replace('hidden', 'block');
-
-                sidebarStudent.classList.replace('block', 'hidden');
-                sidebarInstitute.classList.replace('hidden', 'block');
-                
-                runRecruitmentRadar();
+        function switchAuthTab(tab) {
+            hideAlert();
+            if (tab === 'signin') {
+                document.getElementById('form-signin').classList.remove('hidden');
+                document.getElementById('form-signup').classList.add('hidden');
+                document.getElementById('tab-btn-signin').className = "flex-1 pb-3 text-center text-sm font-semibold border-b-2 border-indigo-500 text-indigo-400";
+                document.getElementById('tab-btn-signup').className = "flex-1 pb-3 text-center text-sm font-semibold text-slate-400 hover:text-white border-b-2 border-transparent";
             } else {
-                currentScope = 'student';
-                
-                body.classList.replace('bg-zinc-950', 'bg-slate-950');
-                pill.classList.replace('bg-emerald-600', 'bg-indigo-600');
-                pill.style.transform = 'translateX(0px)';
-                logo.classList.replace('text-emerald-500', 'text-indigo-500');
-                
-                txtStudent.classList.replace('text-slate-500', 'text-white');
-                txtInstitute.classList.replace('text-white', 'text-slate-400');
-                
-                institutePanel.classList.replace('block', 'hidden');
-                studentPanel.classList.replace('hidden', 'block');
-
-                sidebarInstitute.classList.replace('block', 'hidden');
-                sidebarStudent.classList.replace('hidden', 'block');
+                document.getElementById('form-signin').classList.add('hidden');
+                document.getElementById('form-signup').classList.remove('hidden');
+                document.getElementById('tab-btn-signup').className = "flex-1 pb-3 text-center text-sm font-semibold border-b-2 border-indigo-500 text-indigo-400";
+                document.getElementById('tab-btn-signin').className = "flex-1 pb-3 text-center text-sm font-semibold text-slate-400 hover:text-white border-b-2 border-transparent";
             }
         }
 
-        // Interactive DNA Chip Toggles
-        function toggleDnaChip(element) {
-            if (element.classList.contains('bg-indigo-600')) {
-                element.classList.replace('bg-indigo-600', 'bg-slate-800');
-                element.classList.replace('text-white', 'text-slate-300');
-                element.classList.remove('border-indigo-400');
-            } else {
-                element.classList.replace('bg-slate-800', 'bg-indigo-600');
-                element.classList.replace('text-slate-300', 'text-white');
-                element.classList.add('border-indigo-400');
-            }
+        function showAlert(msg, isError = true) {
+            const el = document.getElementById('auth-alert');
+            el.className = `mb-4 p-3 rounded-lg text-sm ${isError ? 'bg-rose-950/60 border border-rose-800 text-rose-300' : 'bg-emerald-950/60 border border-emerald-800 text-emerald-300'}`;
+            el.textContent = msg;
+            el.classList.remove('hidden');
         }
 
-        function toggleInstChip(element) {
-            if (element.classList.contains('bg-emerald-600')) {
-                element.classList.replace('bg-emerald-600', 'bg-slate-800');
-                element.classList.replace('text-white', 'text-slate-300');
-                element.classList.remove('border-emerald-400');
-            } else {
-                element.classList.replace('bg-slate-800', 'bg-emerald-600');
-                element.classList.replace('text-slate-300', 'text-white');
-                element.classList.add('border-emerald-400');
-            }
+        function hideAlert() {
+            document.getElementById('auth-alert').classList.add('hidden');
         }
 
-        function getSelectedTags(selector) {
-            const tags = [];
-            document.querySelectorAll(selector).forEach(chip => {
-                if (chip.classList.contains('bg-indigo-600') || chip.classList.contains('bg-emerald-600')) {
-                    tags.push(chip.getAttribute('data-tag'));
-                }
-            });
-            return tags;
-        }
+        async function handleEmailSignIn(e) {
+            e.preventDefault();
+            const email = document.getElementById('signin-email').value;
+            const password = document.getElementById('signin-password').value;
 
-        // Backend Integration Functions
-        async function populatePredictorColleges() {
             try {
-                const response = await fetch('/api/universities');
-                const data = await response.json();
-                const selectEl = document.getElementById('predictor-college-select');
-                selectEl.innerHTML = data.universities.map(uni => `<option value="${uni}">${uni}</option>`).join('');
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Sign in failed');
+
+                currentUser = data.user;
+                localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
+                updateAuthUI();
+                closeAuthModal();
             } catch (err) {
-                console.error("Admissions list loading failure:", err);
+                showAlert(err.message, true);
             }
         }
 
-        async function runSingleCollegePrediction() {
-            const selectEl = document.getElementById('predictor-college-select');
-            const targetUni = selectEl.value;
-            if (!targetUni) return;
+        async function handleEmailSignUp(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
 
-            const resultsContainer = document.getElementById('single-predict-results');
-            resultsContainer.classList.remove('hidden');
+            try {
+                const res = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Sign up failed');
 
-            const targetUniEl = document.getElementById('predict-target-uni');
-            const likelihoodTextEl = document.getElementById('predict-likelihood-text');
-            const matchScoreEl = document.getElementById('predict-match-score');
-            const tierBadgeEl = document.getElementById('predict-tier-badge');
-            const strengthsUl = document.getElementById('predict-strengths');
-            const weaknessesUl = document.getElementById('predict-weaknesses');
-            const recommendationsDiv = document.getElementById('predict-recommendations');
+                currentUser = data.user;
+                localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
+                updateAuthUI();
+                closeAuthModal();
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
 
-            targetUniEl.innerText = targetUni;
-            likelihoodTextEl.innerText = "Analyzing candidate portfolio components...";
-            matchScoreEl.innerText = "Match Index: Computing...";
-            tierBadgeEl.className = "px-3 py-1 text-[10px] font-black uppercase rounded-full bg-slate-800 text-slate-400 border border-slate-700";
-            tierBadgeEl.innerText = "CALCULATING";
-            strengthsUl.innerHTML = "<li class='flex items-start gap-2'><span class='animate-pulse'>•</span> Loading admissions trends...</li>";
-            weaknessesUl.innerHTML = "<li class='flex items-start gap-2'><span class='animate-pulse'>•</span> Evaluating structural targets...</li>";
-            recommendationsDiv.innerText = "Compiling tactical action steps...";
+        function initGoogleSDK() {
+            if (typeof google !== 'undefined' && GOOGLE_CLIENT_ID) {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleGoogleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById('google-signin-btn'),
+                    { theme: 'outline', size: 'large', width: '100%' }
+                );
+                document.getElementById('google-fallback-btn').classList.add('hidden');
+            }
+        }
 
+        async function handleGoogleCredentialResponse(response) {
+            try {
+                const res = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Google auth failed');
+
+                currentUser = data.user;
+                localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
+                updateAuthUI();
+                closeAuthModal();
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
+
+        async function handleGoogleFallback() {
+            try {
+                const res = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ token: 'simulated_google_token' })
+                });
+                const data = await res.json();
+                currentUser = data.user;
+                localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
+                updateAuthUI();
+                closeAuthModal();
+            } catch (err) {
+                showAlert(err.message, true);
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+            } catch (e) {}
+            currentUser = null;
+            localStorage.removeItem('unimatch_user');
+            updateAuthUI();
+        }
+
+        async function runStudentMatch() {
             const payload = {
-                university: targetUni,
-                gpa: parseFloat(document.getElementById('student-gpa').value) || 0,
-                sat: parseInt(document.getElementById('student-sat').value) || 0,
-                act: parseInt(document.getElementById('student-act').value) || 0,
-                major: document.getElementById('student-major').value,
-                dna: getSelectedTags('.dna-chip')
+                gpa: parseFloat(document.getElementById('gpa').value),
+                sat: parseInt(document.getElementById('sat').value),
+                act: parseInt(document.getElementById('act').value),
+                major: document.getElementById('major').value,
+                region: document.getElementById('region').value,
+                campus_type: document.getElementById('campus_type').value,
+                dna: ["STEM", "Research", "Leadership"]
             };
 
-            try {
-                const response = await fetch('/api/advisor/predict', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-
-                matchScoreEl.innerText = `Match Index: ${data.match_score}%`;
-                likelihoodTextEl.innerText = data.likelihood;
-                tierBadgeEl.innerText = `${data.tier} MATCH`;
-
-                let badgeColorStyle = "bg-rose-950/80 text-rose-400 border border-rose-900";
-                if (data.color === 'amber') {
-                    badgeColorStyle = "bg-amber-950/80 text-amber-400 border border-amber-900";
-                } else if (data.color === 'emerald') {
-                    badgeColorStyle = "bg-emerald-950/80 text-emerald-400 border border-emerald-900";
-                }
-                tierBadgeEl.className = `px-3 py-1 text-[10px] font-black uppercase rounded-full ${badgeColorStyle}`;
-
-                strengthsUl.innerHTML = data.strengths.map(item => `<li class="flex items-start gap-2"><span class="text-emerald-400 shrink-0">✓</span><span>${item}</span></li>`).join('');
-                weaknessesUl.innerHTML = data.weaknesses.map(item => `<li class="flex items-start gap-2"><span class="text-rose-400 shrink-0">⚠</span><span>${item}</span></li>`).join('');
-                recommendationsDiv.innerText = data.recommendations;
-
-            } catch (err) {
-                console.error("Admissions matching framework interruption:", err);
-                matchScoreEl.innerText = "Admissions matching offline.";
-                tierBadgeEl.innerText = "ERROR";
-                tierBadgeEl.className = "px-3 py-1 text-[10px] font-black uppercase rounded-full bg-rose-950 text-rose-500 border border-rose-900";
-                strengthsUl.innerHTML = "<li>Metric validation failed.</li>";
-                weaknessesUl.innerHTML = "<li>Metric validation failed.</li>";
-                recommendationsDiv.innerText = "Unable to extract dynamic matching parameters at this time.";
-            }
-        }
-
-        async function calculateStudentMatches() {
-            const payload = {
-                gpa: parseFloat(document.getElementById('student-gpa').value) || 0,
-                sat: parseInt(document.getElementById('student-sat').value) || 0,
-                act: parseInt(document.getElementById('student-act').value) || 0,
-                major: document.getElementById('student-major').value,
-                region: document.getElementById('student-region').value,
-                campus_type: document.getElementById('student-campus').value,
-                dna: getSelectedTags('.dna-chip')
-            };
-
-            try {
-                const response = await fetch('/api/match/student', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                currentMatches = data.matches;
-                applyAllFilters();
-            } catch (err) {
-                console.error("Matching engine failure:", err);
-            }
-        }
-
-        function applyAllFilters() {
-            const regionVal = document.getElementById('filter-region').value;
-            const campusVal = document.getElementById('filter-campus').value;
-            const tierVal = document.getElementById('filter-tier').value;
-
-            const filtered = currentMatches.filter(m => {
-                const regionMatches = (regionVal === 'ALL' || m.region === regionVal);
-                const campusMatches = (campusVal === 'ALL' || m.campus_type === campusVal);
-                const tierMatches = (tierVal === 'ALL' || m.tier === tierVal);
-                return regionMatches && campusMatches && tierMatches;
+            const res = await fetch('/api/match/student', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
             });
+            const data = await res.json();
 
-            renderStudentCards(filtered);
-        }
+            const grid = document.getElementById('matches-grid');
+            grid.innerHTML = '';
 
-        function resetFilters() {
-            document.getElementById('filter-region').value = 'ALL';
-            document.getElementById('filter-campus').value = 'ALL';
-            document.getElementById('filter-tier').value = 'ALL';
-            applyAllFilters();
-        }
-
-        function renderStudentCards(matches) {
-            const panel = document.getElementById('student-results-panel');
-            document.getElementById('student-match-count').innerText = `${matches.length} matching schools shown`;
-            
-            if (!matches.length) {
-                panel.innerHTML = `<div class="col-span-1 md:col-span-2 text-center py-16 text-slate-400 border border-slate-800/80 border-dashed rounded-2xl bg-slate-900/30">No universities match the current active filter combinations.</div>`;
-                return;
-            }
-
-            panel.innerHTML = matches.map(m => {
-                let strokeColor = '#10b981';
-                let badgeStyle = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
-                if (m.color === 'amber') {
-                    strokeColor = '#f59e0b';
-                    badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/30";
-                }
-                if (m.color === 'rose') {
-                    strokeColor = '#f43f5e';
-                    badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/30";
-                }
-
-                const radius = 24;
-                const circumference = 2 * Math.PI * radius;
-                const strokeDashoffset = circumference - (m.probability / 100) * circumference;
-
-                return `
-                    <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 shadow-xl transition-all hover:shadow-indigo-500/5 group flex flex-col justify-between space-y-4">
-                        <div class="flex justify-between items-start gap-3">
-                            <div>
-                                <h4 class="text-base font-bold text-white tracking-tight group-hover:text-indigo-300 transition-colors">${m.university}</h4>
-                                <div class="flex flex-wrap gap-1.5 mt-1.5">
-                                    <span class="text-[10px] bg-slate-950/80 border border-slate-800 px-2 py-0.5 rounded-full text-slate-400 font-medium">${m.region}</span>
-                                    <span class="text-[10px] bg-slate-950/80 border border-slate-800 px-2 py-0.5 rounded-full text-slate-400 font-medium">${m.campus_type}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="relative flex items-center justify-center w-14 h-14 shrink-0">
-                                <svg class="transform -rotate-90 w-full h-full">
-                                    <circle cx="28" cy="28" r="${radius}" stroke="#1e293b" stroke-width="4" fill="transparent" />
-                                    <circle cx="28" cy="28" r="${radius}" stroke="${strokeColor}" stroke-width="4" fill="transparent"
-                                            stroke-dasharray="${circumference}" stroke-dashoffset="${strokeDashoffset}" stroke-linecap="round" class="transition-all duration-700 ease-out"/>
-                                </svg>
-                                <span class="absolute text-xs font-black text-white">${m.probability}%</span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between gap-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Status:</span>
-                                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${badgeStyle}">${m.tier} Match</span>
-                                </div>
-                                <button onclick="fetchProfileAdvice('${m.university.replace(/'/g, "\\'")}', '${m.tier}')" class="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 underline underline-offset-2">
-                                    <span>✨ Optimize Odds</span>
-                                </button>
-                            </div>
-                            <p class="text-xs text-slate-400 leading-relaxed">${m.reasoning}</p>
-                        </div>
-
-                        <div class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800/60">
-                            ${m.dna_tags.map(tag => `<span class="text-[10px] bg-indigo-950/40 text-indigo-300 border border-indigo-800/40 px-2 py-0.5 rounded-md font-medium">#${tag}</span>`).join('')}
-                        </div>
+            data.matches.forEach(m => {
+                const colorMap = {
+                    emerald: 'border-emerald-500/30 bg-emerald-950/20 text-emerald-400',
+                    amber: 'border-amber-500/30 bg-amber-950/20 text-amber-400',
+                    rose: 'border-rose-500/30 bg-rose-950/20 text-rose-400'
+                };
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-3";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-white text-lg">${m.university}</h4>
+                        <span class="text-xs px-2.5 py-1 rounded-full border ${colorMap[m.color] || 'text-indigo-400'} font-semibold">${m.tier}</span>
                     </div>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <p><i class="fa-solid fa-location-dot"></i> ${m.region} • ${m.campus_type}</p>
+                        <p><i class="fa-solid fa-chart-line"></i> Strategic Probability: <strong class="text-slate-200">${m.probability}%</strong></p>
+                    </div>
+                    <p class="text-xs text-slate-300 italic border-t border-slate-800 pt-2">${m.reasoning}</p>
                 `;
-            }).join('');
-        }
+                grid.appendChild(card);
+            });
 
-        async function fetchProfileAdvice(university, tier) {
-            const advisorBox = document.getElementById('student-advisor-box');
-            const advisorText = document.getElementById('student-advisor-text');
-            
-            advisorText.innerText = "Running optimization sequence inference models...";
-            advisorBox.classList.remove('hidden');
-
-            const payload = {
-                university: university,
-                tier: tier,
-                gpa: parseFloat(document.getElementById('student-gpa').value) || 3.5,
-                sat: parseInt(document.getElementById('student-sat').value) || 1400,
-                act: parseInt(document.getElementById('student-act').value) || 30,
-                dna: getSelectedTags('.dna-chip')
-            };
-
-            try {
-                const response = await fetch('/api/advisor/profile', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                advisorText.innerText = data.advice;
-            } catch (err) {
-                advisorText.innerText = "Error executing analysis parameter optimization loops.";
-            }
-        }
-
-        async function runRecruitmentRadar() {
-            const payload = {
-                min_gpa: parseFloat(document.getElementById('inst-min-gpa').value) || 0,
-                target_dna: getSelectedTags('.inst-dna-chip'),
-                anonymize: document.getElementById('equity-filter-toggle').checked
-            };
-
-            try {
-                const response = await fetch('/api/match/institute', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                renderInstituteList(data.candidates);
-            } catch (err) {
-                console.error("Institutional matrix execution error:", err);
-            }
-        }
-
-        async function fetchOutreachStrategy() {
-            const advisorBox = document.getElementById('inst-advisor-box');
-            const advisorText = document.getElementById('inst-advisor-text');
-            
-            advisorText.innerText = "Generating structural alignment summary insights...";
-            advisorBox.classList.remove('hidden');
-
-            const payload = {
-                min_gpa: parseFloat(document.getElementById('inst-min-gpa').value) || 3.5,
-                target_dna: getSelectedTags('.inst-dna-chip')
-            };
-
-            try {
-                const response = await fetch('/api/advisor/outreach', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                advisorText.innerText = data.strategy;
-            } catch (err) {
-                advisorText.innerText = "Failed to synchronize strategic analytical models.";
-            }
-        }
-
-        function renderInstituteList(candidates) {
-            const panel = document.getElementById('institute-results-panel');
-            document.getElementById('inst-candidate-count').innerText = `${candidates.length} Match Cohorts Found`;
-
-            if (!candidates.length) {
-                panel.innerHTML = `<div class="text-center py-16 text-slate-400 border border-slate-800/80 border-dashed rounded-2xl bg-slate-900/30">No candidates found meeting this baseline configuration.</div>`;
-                return;
-            }
-
-            panel.innerHTML = candidates.map(c => `
-                <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 hover:border-slate-700/80 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl transition-all hover:shadow-emerald-500/5 group">
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <h4 class="text-sm font-bold text-white tracking-wide group-hover:text-emerald-300 transition-colors">${c.name}</h4>
-                            <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Fit Score: ${c.fit_score}%</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
-                            <span>GPA: <strong class="text-slate-200 font-semibold">${c.gpa.toFixed(2)}</strong></span>
-                            <span>SAT: <strong class="text-slate-200 font-semibold">${c.sat}</strong></span>
-                            <span>ACT: <strong class="text-slate-200 font-semibold">${c.act}</strong></span>
-                            <span>Major Path: <strong class="text-emerald-400/90 font-medium">${c.major}</strong></span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex flex-wrap gap-1.5 items-center max-w-xs md:justify-end">
-                        ${c.dna.map(tag => `<span class="text-[10px] bg-slate-950/80 text-slate-300 px-2 py-0.5 rounded-md border border-slate-800">#${tag}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
+            document.getElementById('matches-results').classList.remove('hidden');
         }
     </script>
 </body>

@@ -1,17 +1,28 @@
 import os
 import random
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 from dotenv import load_dotenv
 from groq import Groq
+from supabase import create_client, Client
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 # Initialize application environmental constraints
 load_dotenv()
 
 app = Flask(__name__, template_folder='../templates')
+app.secret_key = os.environ.get("SECRET_KEY", "unimatch-secret-key-2026")
 
 # Initialize Groq client with global API key validation
 groq_api_key = os.environ.get("GROQ_API_KEY", "")
 groq_client = Groq(api_key=groq_api_key) if groq_api_key else None
+
+# Initialize Supabase and Google Auth configurations
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY", os.environ.get("SUPABASE_KEY", ""))
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+
+supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
 
 # Validated Production Groq Inference Target
 GROQ_MODEL_ID = "llama-3.1-70b-versatile"
@@ -84,7 +95,7 @@ MOCK_STUDENTS = generate_mock_students()
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', google_client_id=GOOGLE_CLIENT_ID)
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -92,8 +103,188 @@ def health_check():
         "status": "operational",
         "localization": "US Higher-Ed Framework (4.0 Scale / SAT / ACT)",
         "active_llm_target": GROQ_MODEL_ID,
-        "api_key_configured": bool(groq_client)
+        "api_key_configured": bool(groq_client),
+        "supabase_configured": bool(supabase_client),
+        "google_auth_configured": bool(GOOGLE_CLIENT_ID)
     }), 200
+
+# --- AUTHENTICATION ROUTE HANDLERS ---
+
+@app.route('/api/auth/signup', methods=['POST'])
+def auth_signup():
+    """Handles user sign-up using Supabase email/password auth."""
+    data = request.json or {}
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+    name = data.get('name', '').strip()
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required."}), 400
+
+    if not supabase_client:
+        return jsonify({
+            "message": "Sign up successful (Simulated Mode - configure SUPABASE_URL & SUPABASE_ANON_KEY for live DB).",
+            "user": {
+                "id": f"usr_{random.randint(1000, 9999)}",
+                "email": email,
+                "name": name or email.split('@')[0]
+            }
+        }), 201
+
+    try:
+        response = supabase_client.auth.sign_up({
+            "email": email,
+            "password": password,
+            "options": {
+                "data": {
+                    "full_name": name
+                }
+            }
+        })
+        user = response.user
+        session_data = response.session
+        return jsonify({
+            "message": "Registration successful.",
+            "user": {
+                "id": user.id if user else None,
+                "email": user.email if user else email,
+                "name": name or (user.email.split('@')[0] if user else email)
+            },
+            "access_token": session_data.access_token if session_data else None
+        }), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/api/auth/login', methods=['POST'])
+def auth_login():
+    """Handles user sign-in using Supabase email/password auth."""
+    data = request.json or {}
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required."}), 400
+
+    if not supabase_client:
+        return jsonify({
+            "message": "Login successful (Simulated Mode - configure SUPABASE_URL & SUPABASE_ANON_KEY for live DB).",
+            "user": {
+                "id": f"usr_{random.randint(1000, 9999)}",
+                "email": email,
+                "name": email.split('@')[0]
+            },
+            "access_token": "simulated_access_token_xyz"
+        }), 200
+
+    try:
+        response = supabase_client.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
+        user = response.user
+        session_data = response.session
+        return jsonify({
+            "message": "Login successful.",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.user_metadata.get("full_name") or user.email.split('@')[0]
+            },
+            "access_token": session_data.access_token if session_data else None
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
+
+@app.route('/api/auth/google', methods=['POST'])
+def auth_google():
+    """Handles Google OAuth / Google Cloud Console ID token authentication."""
+    data = request.json or {}
+    token = data.get('token') or data.get('credential')
+
+    if not token:
+        return jsonify({"error": "Google ID token or credential is required."}), 400
+
+    if not GOOGLE_CLIENT_ID:
+        # Simulated mode for local/testing environments without a configured Google Client ID
+        return jsonify({
+            "message": "Google authentication successful (Simulated Mode - configure GOOGLE_CLIENT_ID for live auth).",
+            "user": {
+                "id": f"google_usr_{random.randint(1000, 9999)}",
+                "email": "google.user@example.com",
+                "name": "Google User",
+                "picture": "https://lh3.googleusercontent.com/a/default-user"
+            }
+        }), 200
+
+    # Validate the ID token against the configured Google Client ID
+    try:
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
+    except Exception as e:
+        return jsonify({"error": f"Google token verification failed: {str(e)}"}), 401
+
+    user_info = {
+        "id": idinfo.get("sub"),
+        "email": idinfo.get("email"),
+        "name": idinfo.get("name"),
+        "picture": idinfo.get("picture")
+    }
+
+    # Sync with Supabase if configured; fall back to the verified Google identity if this fails
+    if supabase_client:
+        try:
+            res = supabase_client.auth.sign_in_with_id_token({
+                "provider": "google",
+                "token": token
+            })
+            if res.user:
+                user_info = {
+                    "id": res.user.id,
+                    "email": res.user.email,
+                    "name": res.user.user_metadata.get("full_name") or res.user.user_metadata.get("name") or res.user.email.split('@')[0],
+                    "picture": res.user.user_metadata.get("avatar_url") or user_info.get("picture")
+                }
+        except Exception:
+            pass
+
+    return jsonify({
+        "message": "Google authentication successful.",
+        "user": user_info
+    }), 200
+
+@app.route('/api/auth/logout', methods=['POST'])
+def auth_logout():
+    """Handles user logout."""
+    if supabase_client:
+        try:
+            supabase_client.auth.sign_out()
+        except Exception:
+            pass
+    return jsonify({"message": "Logged out successfully."}), 200
+
+@app.route('/api/auth/user', methods=['GET'])
+def get_auth_user():
+    """Returns current user details based on session or Authorization token."""
+    auth_header = request.headers.get('Authorization', '')
+    token = auth_header.replace('Bearer ', '') if auth_header.startswith('Bearer ') else None
+
+    if token and supabase_client:
+        try:
+            res = supabase_client.auth.get_user(token)
+            if res.user:
+                return jsonify({
+                    "authenticated": True,
+                    "user": {
+                        "id": res.user.id,
+                        "email": res.user.email,
+                        "name": res.user.user_metadata.get("full_name") or res.user.email.split('@')[0]
+                    }
+                }), 200
+        except Exception:
+            pass
+
+    return jsonify({"authenticated": False, "user": None}), 200
+
+# --- CORE DOMAIN API ENDPOINTS ---
 
 @app.route('/api/universities', methods=['GET'])
 def get_universities():
