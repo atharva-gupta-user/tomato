@@ -3,689 +3,150 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UniMatch — Find the right college for you</title>
+<title>UniMatch — Higher-Education AI Platform</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-  :root{
-    --cream:#F6F3EC; --paper:#FFFFFF; --ink:#1B2A22; --forest:#1F3D2E;
-    --forest-dark:#14281E; --moss:#5C7A63; --line:#E4DFD1; --amber:#C98A3B; --rose:#B65A4A;
-  }
-  body{background:var(--cream); color:var(--ink); font-family:'Inter',sans-serif;}
+  :root{--cream:#F6F3EC;--paper:#FFFFFF;--ink:#1B2A22;--forest:#1F3D2E;--moss:#5C7A63;--line:#E4DFD1;--amber:#C98A3B;--rose:#B65A4A;}
+  body{background:var(--cream);color:var(--ink);font-family:'Inter',sans-serif;}
   .serif{font-family:'Fraunces',serif;}
-  .btn-primary{background:var(--forest); color:#fff; transition:.2s;}
-  .btn-primary:hover{background:var(--forest-dark);}
-  .input-field{background:var(--paper); border:1px solid var(--line); color:var(--ink);}
-  .input-field:focus{outline:none; border-color:var(--forest);}
-  ::-webkit-scrollbar{width:8px;} ::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px;}
-  .tier-safety{border-color:#3F6B4A33; background:#3F6B4A0D; color:#3F6B4A;}
-  .tier-target{border-color:#C98A3B33; background:#C98A3B0D; color:#A5722C;}
-  .tier-reach{border-color:#B65A4A33; background:#B65A4A0D; color:#B65A4A;}
-  .fade-up{animation:fadeUp .5s ease both;}
-  @keyframes fadeUp{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
 </style>
 </head>
-<body class="min-h-screen antialiased">
-
-  <nav class="border-b border-[var(--line)] bg-[var(--cream)]/90 backdrop-blur sticky top-0 z-40">
-    <div class="max-w-[1400px] mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
-      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchMainView('student')">
-        <div class="w-9 h-9 rounded-full bg-[var(--forest)] flex items-center justify-center text-[var(--cream)]">
-          <i class="fa-solid fa-graduation-cap text-sm"></i>
-        </div>
-        <span class="serif text-xl font-semibold tracking-tight">UniMatch</span>
-      </div>
-
-      <div class="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--moss)]">
-        <button onclick="openHowItWorksModal()" class="hover:text-[var(--ink)] transition">How it works</button>
-        <button onclick="switchMainView('institute')" id="nav-institute-btn" class="hover:text-[var(--ink)] transition">Institutions Portal</button>
-        <button onclick="openInsightsModal()" class="hover:text-[var(--ink)] transition">Insight & Strategy</button>
-      </div>
-
+<body class="min-h-screen flex flex-col">
+  <header class="border-b border-[var(--line)] bg-[var(--paper)] sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div id="auth-unauthenticated" class="flex items-center gap-3">
-          <button onclick="openAuthModal('signin')" class="px-4 py-2 text-sm font-medium text-[var(--ink)] hover:text-[var(--forest)] transition">Sign In</button>
-          <button onclick="openAuthModal('signup')" class="px-5 py-2.5 text-sm font-semibold btn-primary rounded-full">Get Started</button>
-        </div>
-        <div id="auth-authenticated" class="hidden items-center gap-3">
-          <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[var(--line)]">
-            <div id="user-avatar" class="w-6 h-6 rounded-full bg-[var(--forest)] flex items-center justify-center text-[10px] font-bold text-white uppercase">U</div>
-            <span id="user-display-name" class="text-sm font-medium">User</span>
-          </div>
-          <button onclick="handleLogout()" class="text-[var(--moss)] hover:text-[var(--rose)] p-2 text-sm transition" title="Log Out">
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
+        <span class="serif text-xl font-bold tracking-tight text-[var(--forest)]">UniMatch</span>
+        <span class="text-xs bg-[var(--forest)]/10 text-[var(--forest)] px-2.5 py-0.5 rounded-full font-medium">Enterprise v2.6</span>
       </div>
-    </div>
-  </nav>
-
-  <div class="bg-white border-b border-[var(--line)] py-3">
-    <div class="max-w-[1400px] mx-auto px-6 lg:px-10 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <button id="tab-student-view" onclick="switchMainView('student')" class="px-4 py-2 rounded-full text-xs font-semibold bg-[var(--forest)] text-white transition">
-          <i class="fa-solid fa-user-graduate mr-1.5"></i> Student Matchmaker
-        </button>
-        <button id="tab-institute-view" onclick="switchMainView('institute')" class="px-4 py-2 rounded-full text-xs font-semibold bg-white text-[var(--moss)] border border-[var(--line)] hover:border-[var(--forest)] transition">
-          <i class="fa-solid fa-building-columns mr-1.5"></i> Institute Admissions View
-        </button>
-      </div>
-      <div class="text-xs text-[var(--moss)] hidden sm:block">
-        <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Live US Higher-Ed Engine Active
-      </div>
-    </div>
-  </div>
-
-  <header class="max-w-[1400px] mx-auto px-6 lg:px-10 pt-10 pb-8">
-    <div class="grid lg:grid-cols-2 gap-10 items-end">
-      <div>
-        <p class="text-xs font-semibold tracking-[0.2em] text-[var(--moss)] uppercase mb-4">Applications, decided by data</p>
-        <h1 id="hero-title" class="serif text-4xl sm:text-5xl leading-[1.05] font-medium tracking-tight">
-          Change the way<br>you choose your <em class="italic">college</em>
-        </h1>
-      </div>
-      <p id="hero-desc" class="text-[var(--moss)] text-base sm:text-lg leading-relaxed max-w-md lg:justify-self-end">
-        Enter your academic profile on the left. Our matching engine reads it against 20 institutional archetypes and returns a ranked shortlist instantly.
-      </p>
+      <nav class="flex items-center gap-6 text-sm font-medium">
+        <button onclick="triggerOutreachStrategy()" class="text-[var(--moss)] hover:text-[var(--forest)] transition">Insight & Strategy</button>
+        <button onclick="openTrainingModal()" class="bg-[var(--forest)] text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[var(--forest)]/90 transition shadow-sm">Train AI Engine</button>
+      </nav>
     </div>
   </header>
 
-  <main class="max-w-[1400px] mx-auto px-6 lg:px-10 pb-20">
-
-    <div id="view-student" class="grid lg:grid-cols-[360px_1fr] gap-8 items-start">
-      <aside class="lg:sticky lg:top-28 bg-white border border-[var(--line)] rounded-2xl p-7 shadow-[0_1px_0_var(--line)]">
-        <h2 class="serif text-xl font-semibold mb-1">Your profile</h2>
-        <p class="text-xs text-[var(--moss)] mb-6">Used only to compute your college matches.</p>
-
-        <form id="student-match-form" class="space-y-4" onsubmit="event.preventDefault(); runStudentMatch();">
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">Unweighted GPA</label>
-            <input type="number" step="0.01" min="0" max="4.0" id="gpa" value="3.75" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">SAT</label>
-              <input type="number" step="10" min="400" max="1600" id="sat" value="1420" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">ACT</label>
-              <input type="number" min="1" max="36" id="act" value="31" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">Target Major</label>
-            <select id="major" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
-              <option>Computer Science</option>
-              <option>Business Administration</option>
-              <option>Mechanical Engineering</option>
-              <option>Biology</option>
-              <option>Economics</option>
-              <option>Political Science</option>
-              <option>Arts</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">Preferred Region</label>
-            <select id="region" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
-              <option>Northeast</option><option>West</option><option>Midwest</option><option>South</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">Campus Setting</label>
-            <select id="campus_type" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
-              <option>Urban</option><option>Suburban</option><option>Rural</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-2">Your strengths & DNA</label>
-            <div id="dna-options" class="flex flex-wrap gap-2"></div>
-          </div>
-
-          <button type="submit" class="w-full btn-primary font-semibold py-3 rounded-full flex items-center justify-center gap-2 text-sm mt-2">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Find my colleges
-          </button>
-        </form>
-
-        <div class="mt-6 pt-5 border-t border-[var(--line)]">
-          <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-2">Deep College Predictor</label>
-          <div class="space-y-3">
-            <select id="predict-uni-select" class="input-field w-full rounded-lg px-3.5 py-2 text-xs"></select>
-            <button onclick="runDeepPrediction()" class="w-full bg-white hover:bg-[var(--cream)] text-[var(--ink)] border border-[var(--line)] font-semibold py-2 rounded-full text-xs transition flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-chart-pie text-[var(--forest)]"></i> Run Deep Fit Analysis
-            </button>
-          </div>
+  <main class="max-w-6xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+    <div class="bg-white border border-[var(--line)] rounded-3xl p-8 shadow-sm">
+      <h2 class="serif text-2xl font-bold text-[var(--forest)] mb-4">Student Matching & Evaluation Portal</h2>
+      <form id="match-form" onsubmit="handleMatch(event)" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--moss)] mb-2">GPA (0.0 – 4.0)</label>
+          <input type="number" id="gpa" step="0.01" min="0.0" max="4.0" value="3.75" required class="w-full bg-[var(--cream)] border border-[var(--line)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--forest)]">
         </div>
-      </aside>
-
-      <section class="space-y-6">
-        <div id="results-empty" class="border border-dashed border-[var(--line)] rounded-2xl p-16 text-center bg-white/40">
-          <i class="fa-solid fa-compass text-3xl text-[var(--moss)] mb-4"></i>
-          <p class="serif text-lg mb-1">No matches generated yet</p>
-          <p class="text-sm text-[var(--moss)] max-w-sm mx-auto">Fill in your profile on the left and the AI will generate a ranked shortlist of colleges right here.</p>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--moss)] mb-2">SAT Score (400 – 1600)</label>
+          <input type="number" id="sat" step="10" min="400" max="1600" value="1420" required class="w-full bg-[var(--cream)] border border-[var(--line)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--forest)]">
         </div>
-
-        <div id="matches-results" class="hidden">
-          <div class="flex items-center justify-between mb-5">
-            <h3 class="serif text-2xl font-semibold">Your matches</h3>
-            <span id="matches-count" class="text-xs text-[var(--moss)] font-medium"></span>
-          </div>
-          <div id="matches-grid" class="grid sm:grid-cols-2 gap-5"></div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--moss)] mb-2">ACT Score (1 – 36)</label>
+          <input type="number" id="act" step="1" min="1" max="36" value="32" required class="w-full bg-[var(--cream)] border border-[var(--line)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--forest)]">
         </div>
-
-        <div id="deep-predictor-card" class="hidden bg-white border border-[var(--line)] rounded-2xl p-7 space-y-5">
-          <div class="flex items-center justify-between border-b border-[var(--line)] pb-4">
-            <div>
-              <span class="text-xs font-semibold uppercase tracking-wider text-[var(--moss)]">Deep Institutional Audit</span>
-              <h4 id="dp-uni-title" class="serif text-xl font-semibold">University Name</h4>
-            </div>
-            <div class="text-right">
-              <span id="dp-score-badge" class="px-3 py-1 rounded-full text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">92% Match</span>
-            </div>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-5 text-xs">
-            <div class="bg-[var(--cream)] p-4 rounded-xl space-y-2">
-              <h5 class="font-semibold text-[var(--ink)] uppercase tracking-wider text-[11px]"><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Profile Strengths</h5>
-              <ul id="dp-strengths" class="space-y-1.5 text-[var(--moss)]"></ul>
-            </div>
-            <div class="bg-[var(--cream)] p-4 rounded-xl space-y-2">
-              <h5 class="font-semibold text-[var(--ink)] uppercase tracking-wider text-[11px]"><i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i> Vulnerabilities</h5>
-              <ul id="dp-weaknesses" class="space-y-1.5 text-[var(--moss)]"></ul>
-            </div>
-          </div>
-
-          <div class="bg-[var(--forest)]/5 border border-[var(--forest)]/20 p-4 rounded-xl space-y-2">
-            <h5 class="font-semibold text-[var(--forest)] uppercase tracking-wider text-[11px]"><i class="fa-solid fa-robot mr-1"></i> Admissions Officer AI Strategy</h5>
-            <p id="dp-recommendations" class="text-xs text-[var(--ink)] leading-relaxed"></p>
-          </div>
+        <div class="md:col-span-3 flex justify-end">
+          <button type="submit" class="bg-[var(--forest)] text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-[var(--forest)]/90 transition">Evaluate Admissions Matrix</button>
         </div>
-      </section>
+      </form>
     </div>
 
-    <div id="view-institute" class="hidden space-y-8">
-      <div class="bg-white border border-[var(--line)] rounded-2xl p-7 shadow-sm">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h3 class="serif text-2xl font-semibold">Institute Admissions Command Portal</h3>
-            <p class="text-xs text-[var(--moss)]">Filter applicant pipelines across the US matching matrix using custom institutional criteria.</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <button onclick="runInstituteMatch()" class="btn-primary px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2">
-              <i class="fa-solid fa-filter"></i> Run Candidate Search
-            </button>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-5 pt-4 border-t border-[var(--line)]">
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">Minimum Applicant GPA</label>
-            <input type="number" step="0.05" min="3.0" max="4.0" id="inst-min-gpa" value="3.5" class="input-field w-full rounded-lg px-3.5 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">Target DNA Requirements</label>
-            <div id="inst-dna-options" class="flex flex-wrap gap-1.5 mt-1"></div>
-          </div>
-          <div class="flex flex-col justify-end">
-            <label class="flex items-center gap-2 text-xs font-medium text-[var(--ink)] cursor-pointer py-2">
-              <input type="checkbox" id="inst-anonymize" class="rounded accent-[var(--forest)] w-4 h-4">
-              Anonymize Candidate Names (Blind Review)
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white border border-[var(--line)] rounded-2xl p-7 space-y-5">
-        <div class="flex items-center justify-between">
-          <h4 id="inst-results-title" class="serif text-xl font-semibold">Matched Candidate Pool</h4>
-          <span id="inst-count" class="text-xs font-medium text-[var(--moss)]">0 applicants found</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead>
-              <tr class="border-b border-[var(--line)] text-[var(--moss)] uppercase tracking-wider text-[10px]">
-                <th class="pb-3 font-semibold">Applicant</th>
-                <th class="pb-3 font-semibold">GPA</th>
-                <th class="pb-3 font-semibold">SAT / ACT</th>
-                <th class="pb-3 font-semibold">Target Major</th>
-                <th class="pb-3 font-semibold">DNA Footprint</th>
-                <th class="pb-3 font-semibold text-right">Fit Score</th>
-              </tr>
-            </thead>
-            <tbody id="inst-candidates-table" class="divide-y divide-[var(--line)]"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
+    <div id="results-container" class="space-y-4"></div>
   </main>
 
-  <div id="modal-how" class="fixed inset-0 bg-[var(--ink)]/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-[var(--line)] rounded-2xl max-w-lg w-full p-8 shadow-2xl relative space-y-5">
-      <button onclick="closeModal('modal-how')" class="absolute top-5 right-5 text-[var(--moss)] hover:text-[var(--ink)] text-lg"><i class="fa-solid fa-xmark"></i></button>
-      <h3 class="serif text-2xl font-semibold">How UniMatch Works</h3>
-      <div class="space-y-3 text-xs text-[var(--moss)] leading-relaxed">
-        <p><strong class="text-[var(--ink)]">1. Multi-Factor Calibration:</strong> UniMatch maps student academic profiles against real institutional admission baselines including historical GPA floors and test score mid-ranges.</p>
-        <p><strong class="text-[var(--ink)]">2. DNA Matching Matrix:</strong> Beyond numbers, our engine evaluates student extracurricular archetypes (STEM, Leadership, Research, Arts) to quantify institutional cultural fit.</p>
-        <p><strong class="text-[var(--ink)]">3. AI-Powered Advisory:</strong> Integrated LLM inference pipelines evaluate student credentials in real-time to provide tactical suggestions for boosting admission success probability.</p>
+  <div id="training-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-8 border border-[var(--line)] shadow-xl relative space-y-6">
+      <div class="flex justify-between items-center">
+        <h3 class="serif text-xl font-bold text-[var(--forest)]">Contribute Data to Train AI</h3>
+        <button onclick="closeTrainingModal()" class="text-gray-400 hover:text-black"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <button onclick="closeModal('modal-how')" class="w-full btn-primary py-2.5 rounded-full text-xs font-semibold">Got it</button>
-    </div>
-  </div>
-
-  <div id="modal-insights" class="fixed inset-0 bg-[var(--ink)]/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-[var(--line)] rounded-2xl max-w-lg w-full p-8 shadow-2xl relative space-y-5">
-      <button onclick="closeModal('modal-insights')" class="absolute top-5 right-5 text-[var(--moss)] hover:text-[var(--ink)] text-lg"><i class="fa-solid fa-xmark"></i></button>
-      <h3 class="serif text-2xl font-semibold">Institutional Outreach Strategy</h3>
-      <div id="insights-content" class="space-y-3 text-xs text-[var(--ink)] bg-[var(--cream)] p-4 rounded-xl leading-relaxed">
-        Generating algorithmic outreach metrics...
-      </div>
-      <button onclick="closeModal('modal-insights')" class="w-full btn-primary py-2.5 rounded-full text-xs font-semibold">Close Strategy Audit</button>
-    </div>
-  </div>
-
-  <div id="auth-modal" class="fixed inset-0 bg-[var(--ink)]/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-[var(--line)] rounded-2xl max-w-md w-full p-7 shadow-2xl relative">
-      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--moss)] hover:text-[var(--ink)] text-lg">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex border-b border-[var(--line)] mb-6">
-        <button id="tab-btn-signin" onclick="switchAuthTab('signin')" class="flex-1 pb-3 text-center text-sm font-semibold border-b-2 border-[var(--forest)] text-[var(--forest)]">Sign In</button>
-        <button id="tab-btn-signup" onclick="switchAuthTab('signup')" class="flex-1 pb-3 text-center text-sm font-semibold text-[var(--moss)] hover:text-[var(--ink)] border-b-2 border-transparent">Sign Up</button>
-      </div>
-
-      <div id="auth-alert" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
-
-      <form id="form-signin" class="space-y-4" onsubmit="handleEmailSignIn(event)">
+      <form id="training-form" onsubmit="submitTrainingData(event)" class="space-y-4">
         <div>
-          <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1">Email Address</label>
-          <input type="email" id="signin-email" required placeholder="student@university.edu" class="input-field w-full rounded-lg px-4 py-2.5 text-sm">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--moss)] mb-1">Contributor Name</label>
+          <input type="text" id="train-name" placeholder="Alex Morgan" required class="w-full bg-[var(--cream)] border border-[var(--line)] rounded-xl px-4 py-2.5 text-sm">
         </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1">Password</label>
-          <input type="password" id="signin-password" required placeholder="••••••••" class="input-field w-full rounded-lg px-4 py-2.5 text-sm">
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--moss)] mb-1">GPA (0-4)</label>
+            <input type="number" id="train-gpa" step="0.01" min="0.0" max="4.0" value="3.8" required class="w-full bg-[var(--cream)] border border-[var(--line)] rounded-xl px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--moss)] mb-1">SAT</label>
+            <input type="number" id="train-sat" step="10" min="400" max="1600" value="1450" required class="w-full bg-[var(--cream)] border border-[var(--line)] rounded-xl px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--moss)] mb-1">ACT</label>
+            <input type="number" id="train-act" step="1" min="1" max="36" value="32" required class="w-full bg-[var(--cream)] border border-[var(--line)] rounded-xl px-3 py-2 text-sm">
+          </div>
         </div>
-        <button type="submit" class="w-full btn-primary font-semibold py-2.5 rounded-full text-sm">Sign In</button>
+        <button type="submit" class="w-full bg-[var(--forest)] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[var(--forest)]/90 transition">Submit to Model Training Pool</button>
       </form>
-
-      <form id="form-signup" class="space-y-4 hidden" onsubmit="handleEmailSignUp(event)">
-        <div>
-          <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1">Full Name</label>
-          <input type="text" id="signup-name" required placeholder="Jane Doe" class="input-field w-full rounded-lg px-4 py-2.5 text-sm">
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1">Email Address</label>
-          <input type="email" id="signup-email" required placeholder="student@university.edu" class="input-field w-full rounded-lg px-4 py-2.5 text-sm">
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1">Password</label>
-          <input type="password" id="signup-password" required minlength="6" placeholder="••••••••" class="input-field w-full rounded-lg px-4 py-2.5 text-sm">
-        </div>
-        <button type="submit" class="w-full btn-primary font-semibold py-2.5 rounded-full text-sm">Create Account</button>
-      </form>
-
-      <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-[var(--line)]"></div></div>
-        <div class="relative flex justify-center text-xs text-[var(--moss)] uppercase"><span class="bg-white px-2">Or continue with</span></div>
-      </div>
-
-      <div class="flex flex-col items-center">
-        <div id="google-signin-btn"></div>
-        <button id="google-fallback-btn" onclick="handleGoogleFallback()" class="w-full bg-[var(--cream)] hover:bg-[var(--line)] text-[var(--ink)] border border-[var(--line)] font-medium py-2.5 px-4 rounded-full flex items-center justify-center gap-3 transition {{ 'hidden' if google_client_id else '' }}">
-          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-          Continue with Google
-        </button>
-      </div>
     </div>
   </div>
 
-<script>
-  const GOOGLE_CLIENT_ID = "{{ google_client_id or '' }}";
-  let currentUser = null;
-  const DNA_POOL = ["STEM","Leadership","Community Service","Arts","Athletics","First-Gen","Research","Innovation"];
-  let selectedDna = new Set(["STEM","Research","Leadership"]);
-  let selectedInstDna = new Set(["STEM","Innovation"]);
+  <script>
+    async function handleMatch(e) {
+      e.preventDefault();
+      const payload = {
+        gpa: parseFloat(document.getElementById('gpa').value),
+        sat: parseInt(document.getElementById('sat').value),
+        act: parseInt(document.getElementById('act').value),
+        major: 'Computer Science',
+        region: 'Northeast',
+        campus_type: 'Urban',
+        dna: ['STEM', 'Research']
+      };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    initSession();
-    waitForGoogleSDK();
-    renderDnaOptions();
-    renderInstDnaOptions();
-    loadUniversitiesList();
-  });
-
-  function switchMainView(view) {
-    const isStudent = view === 'student';
-    document.getElementById('view-student').classList.toggle('hidden', !isStudent);
-    document.getElementById('view-institute').classList.toggle('hidden', isStudent);
-    document.getElementById('tab-student-view').className = `px-4 py-2 rounded-full text-xs font-semibold transition ${isStudent ? 'bg-[var(--forest)] text-white' : 'bg-white text-[var(--moss)] border border-[var(--line)]'}`;
-    document.getElementById('tab-institute-view').className = `px-4 py-2 rounded-full text-xs font-semibold transition ${!isStudent ? 'bg-[var(--forest)] text-white' : 'bg-white text-[var(--moss)] border border-[var(--line)]'}`;
-    
-    if(!isStudent) {
-      document.getElementById('hero-title').innerHTML = `Institute <em class="italic">Admissions</em> Portal`;
-      document.getElementById('hero-desc').textContent = `Manage institutional recruiting pipelines, inspect candidate scores, and calibrate yield strategies in real-time.`;
-      runInstituteMatch();
-    } else {
-      document.getElementById('hero-title').innerHTML = `Change the way<br>you choose your <em class="italic">college</em>`;
-      document.getElementById('hero-desc').textContent = `Enter your academic profile on the left. Our matching engine reads it against 20 institutional archetypes and returns a ranked shortlist instantly.`;
-    }
-  }
-
-  function renderDnaOptions(){
-    const wrap = document.getElementById('dna-options');
-    wrap.innerHTML = '';
-    DNA_POOL.forEach(tag => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      const active = selectedDna.has(tag);
-      btn.className = `text-xs px-3 py-1.5 rounded-full border transition ${active ? 'bg-[var(--forest)] text-white border-[var(--forest)]' : 'bg-white text-[var(--moss)] border-[var(--line)] hover:border-[var(--forest)]'}`;
-      btn.textContent = tag;
-      btn.onclick = () => { active ? selectedDna.delete(tag) : selectedDna.add(tag); renderDnaOptions(); };
-      wrap.appendChild(btn);
-    });
-  }
-
-  function renderInstDnaOptions(){
-    const wrap = document.getElementById('inst-dna-options');
-    wrap.innerHTML = '';
-    DNA_POOL.forEach(tag => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      const active = selectedInstDna.has(tag);
-      btn.className = `text-[11px] px-2.5 py-1 rounded-full border transition ${active ? 'bg-[var(--forest)] text-white border-[var(--forest)]' : 'bg-white text-[var(--moss)] border-[var(--line)]'}`;
-      btn.textContent = tag;
-      btn.onclick = () => { active ? selectedInstDna.delete(tag) : selectedInstDna.add(tag); renderInstDnaOptions(); };
-      wrap.appendChild(btn);
-    });
-  }
-
-  async function loadUniversitiesList() {
-    try {
-      const res = await fetch('/api/universities');
-      const data = await res.json();
-      const select = document.getElementById('predict-uni-select');
-      select.innerHTML = '';
-      data.universities.forEach(name => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        select.appendChild(opt);
+      const res = await fetch('/api/match/student', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
       });
-    } catch(e) {}
-  }
+      const data = await res.json();
+      
+      const container = document.getElementById('results-container');
+      container.innerHTML = `<h3 class="serif text-xl font-bold text-[var(--forest)]">Matching Results (${data.matches.length} Universities Indexed)</h3>` + 
+        `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">` + 
+        data.matches.map(m => `<div class="bg-white p-6 rounded-2xl border border-[var(--line)] space-y-2">
+          <div class="flex justify-between font-bold"><span>${m.university}</span><span class="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full">${m.tier}</span></div>
+          <p class="text-xs text-[var(--moss)]">Admit Probability: <strong>${m.probability}%</strong> · Region: ${m.region}</p>
+          <p class="text-xs text-gray-600 italic">${m.reasoning}</p>
+        </div>`).join('') + `</div>`;
+    }
 
-  function openHowItWorksModal() { document.getElementById('modal-how').classList.remove('hidden'); }
-  function openInsightsModal() { 
-    document.getElementById('modal-insights').classList.remove('hidden');
-    fetchOutreachInsights();
-  }
-  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-  async function fetchOutreachInsights() {
-    const el = document.getElementById('insights-content');
-    el.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing institutional outreach patterns...';
-    try {
+    async function triggerOutreachStrategy() {
       const res = await fetch('/api/advisor/outreach', {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ min_gpa: 3.5, target_dna: Array.from(selectedInstDna) })
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({min_gpa: 3.5, target_dna: ['STEM', 'Research']})
       });
       const data = await res.json();
-      el.textContent = data.strategy;
-    } catch(err) {
-      el.textContent = 'Error parsing strategy pipeline.';
+      alert("Institutional Recruitment Strategy:\n\n" + (data.strategy || "Strategy parsed successfully."));
     }
-  }
 
-  function waitForGoogleSDK(retriesLeft = 20) {
-    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-      initGoogleSDK();
-    } else if (GOOGLE_CLIENT_ID && retriesLeft > 0) {
-      setTimeout(() => waitForGoogleSDK(retriesLeft - 1), 150);
-    } else if (GOOGLE_CLIENT_ID) {
-      document.getElementById('google-fallback-btn').classList.remove('hidden');
-    }
-  }
+    function openTrainingModal() { document.getElementById('training-modal').classList.remove('hidden'); document.getElementById('training-modal').classList.add('flex'); }
+    function closeTrainingModal() { document.getElementById('training-modal').classList.remove('flex'); document.getElementById('training-modal').classList.add('hidden'); }
 
-  function initSession() {
-    const savedUser = localStorage.getItem('unimatch_user');
-    if (savedUser) {
-      try { currentUser = JSON.parse(savedUser); updateAuthUI(); }
-      catch (e) { localStorage.removeItem('unimatch_user'); }
-    }
-  }
-
-  function updateAuthUI() {
-    if (currentUser) {
-      document.getElementById('auth-unauthenticated').classList.add('hidden');
-      document.getElementById('auth-authenticated').classList.remove('hidden');
-      document.getElementById('auth-authenticated').classList.add('flex');
-      document.getElementById('user-display-name').textContent = currentUser.name || currentUser.email;
-      document.getElementById('user-avatar').textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
-    } else {
-      document.getElementById('auth-unauthenticated').classList.remove('hidden');
-      document.getElementById('auth-authenticated').classList.add('hidden');
-    }
-  }
-
-  function openAuthModal(tab = 'signin') { document.getElementById('auth-modal').classList.remove('hidden'); switchAuthTab(tab); }
-  function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); hideAlert(); }
-
-  function switchAuthTab(tab) {
-    hideAlert();
-    const signin = tab === 'signin';
-    document.getElementById('form-signin').classList.toggle('hidden', !signin);
-    document.getElementById('form-signup').classList.toggle('hidden', signin);
-    document.getElementById('tab-btn-signin').className = `flex-1 pb-3 text-center text-sm font-semibold border-b-2 ${signin ? 'border-[var(--forest)] text-[var(--forest)]' : 'border-transparent text-[var(--moss)] hover:text-[var(--ink)]'}`;
-    document.getElementById('tab-btn-signup').className = `flex-1 pb-3 text-center text-sm font-semibold border-b-2 ${!signin ? 'border-[var(--forest)] text-[var(--forest)]' : 'border-transparent text-[var(--moss)] hover:text-[var(--ink)]'}`;
-  }
-
-  function showAlert(msg, isError) {
-    const el = document.getElementById('auth-alert');
-    el.textContent = msg;
-    el.className = `mb-4 p-3 rounded-lg text-sm ${isError ? 'bg-[var(--rose)]/10 text-[var(--rose)]' : 'bg-[var(--forest)]/10 text-[var(--forest)]'}`;
-    el.classList.remove('hidden');
-  }
-  function hideAlert() { document.getElementById('auth-alert').classList.add('hidden'); }
-
-  async function handleEmailSignIn(e) {
-    e.preventDefault();
-    const email = document.getElementById('signin-email').value;
-    const password = document.getElementById('signin-password').value;
-    try {
-      const res = await fetch('/api/auth/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Sign in failed');
-      currentUser = data.user;
-      localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
-      updateAuthUI(); closeAuthModal();
-    } catch (err) { showAlert(err.message, true); }
-  }
-
-  async function handleEmailSignUp(e) {
-    e.preventDefault();
-    const name = document.getElementById('signup-name').value;
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    try {
-      const res = await fetch('/api/auth/signup', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name, email, password }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Sign up failed');
-      currentUser = data.user;
-      localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
-      updateAuthUI(); closeAuthModal();
-    } catch (err) { showAlert(err.message, true); }
-  }
-
-  function initGoogleSDK() {
-    if (typeof google !== 'undefined' && GOOGLE_CLIENT_ID) {
-      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleCredentialResponse });
-      google.accounts.id.renderButton(document.getElementById('google-signin-btn'), { theme: 'outline', size: 'large', width: '100%' });
-      document.getElementById('google-fallback-btn').classList.add('hidden');
-    }
-  }
-
-  async function handleGoogleCredentialResponse(response) {
-    try {
-      const res = await fetch('/api/auth/google', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ credential: response.credential }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Google auth failed');
-      currentUser = data.user;
-      localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
-      updateAuthUI(); closeAuthModal();
-    } catch (err) { showAlert(err.message, true); }
-  }
-
-  async function handleGoogleFallback() {
-    try {
-      const res = await fetch('/api/auth/google', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ token: 'simulated_google_token' }) });
-      const data = await res.json();
-      currentUser = data.user;
-      localStorage.setItem('unimatch_user', JSON.stringify(currentUser));
-      updateAuthUI(); closeAuthModal();
-    } catch (err) { showAlert(err.message, true); }
-  }
-
-  async function handleLogout() {
-    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
-    currentUser = null;
-    localStorage.removeItem('unimatch_user');
-    updateAuthUI();
-  }
-
-  async function runStudentMatch() {
-    const payload = {
-      gpa: parseFloat(document.getElementById('gpa').value),
-      sat: parseInt(document.getElementById('sat').value),
-      act: parseInt(document.getElementById('act').value),
-      major: document.getElementById('major').value,
-      region: document.getElementById('region').value,
-      campus_type: document.getElementById('campus_type').value,
-      dna: Array.from(selectedDna)
-    };
-
-    const btn = document.querySelector('#student-match-form button[type="submit"]');
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Matching...';
-    btn.disabled = true;
-
-    try {
-      const res = await fetch('/api/match/student', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      const data = await res.json();
-
-      const grid = document.getElementById('matches-grid');
-      grid.innerHTML = '';
-
-      const tierClass = { emerald: 'tier-safety', amber: 'tier-target', rose: 'tier-reach' };
-
-      data.matches.forEach((m, i) => {
-        const card = document.createElement('div');
-        card.className = "fade-up bg-white border border-[var(--line)] rounded-2xl p-6 space-y-4 hover:shadow-md transition";
-        card.style.animationDelay = `${i * 40}ms`;
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <h4 class="serif text-lg font-semibold leading-snug">${m.university}</h4>
-            <span class="shrink-0 text-[11px] px-2.5 py-1 rounded-full border font-semibold ${tierClass[m.color] || 'tier-target'}">${m.tier}</span>
-          </div>
-          <div class="text-xs text-[var(--moss)] space-y-1.5">
-            <p><i class="fa-solid fa-location-dot w-4"></i> ${m.region} · ${m.campus_type}</p>
-            <p><i class="fa-solid fa-chart-line w-4"></i> Admit likelihood: <strong class="text-[var(--ink)]">${m.probability}%</strong></p>
-          </div>
-          <p class="text-xs text-[var(--ink)]/70 italic border-t border-[var(--line)] pt-3">${m.reasoning}</p>
-        `;
-        grid.appendChild(card);
+    async function submitTrainingData(e) {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById('train-name').value,
+        gpa: parseFloat(document.getElementById('train-gpa').value),
+        sat: parseInt(document.getElementById('train-sat').value),
+        act: parseInt(document.getElementById('train-act').value),
+        major: 'Computer Science',
+        region: 'Northeast',
+        campus_type: 'Urban',
+        dna: ['STEM', 'Innovation']
+      };
+      const res = await fetch('/api/train/contribute', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
       });
-
-      document.getElementById('matches-count').textContent = `${data.matches.length} institutions ranked`;
-      document.getElementById('results-empty').classList.add('hidden');
-      document.getElementById('matches-results').classList.remove('hidden');
-    } finally {
-      btn.innerHTML = originalHtml;
-      btn.disabled = false;
-    }
-  }
-
-  async function runDeepPrediction() {
-    const payload = {
-      university: document.getElementById('predict-uni-select').value,
-      gpa: parseFloat(document.getElementById('gpa').value),
-      sat: parseInt(document.getElementById('sat').value),
-      act: parseInt(document.getElementById('act').value),
-      major: document.getElementById('major').value,
-      dna: Array.from(selectedDna)
-    };
-
-    try {
-      const res = await fetch('/api/advisor/predict', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
       const data = await res.json();
-      if(!res.ok) throw new Error(data.error || 'Prediction failed');
-
-      document.getElementById('dp-uni-title').textContent = data.university;
-      document.getElementById('dp-score-badge').textContent = `${data.match_score}% Fit Score (${data.tier})`;
-      
-      const strengthsList = document.getElementById('dp-strengths');
-      strengthsList.innerHTML = '';
-      data.strengths.forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = `• ${s}`;
-        strengthsList.appendChild(li);
-      });
-
-      const weakList = document.getElementById('dp-weaknesses');
-      weakList.innerHTML = '';
-      data.weaknesses.forEach(w => {
-        const li = document.createElement('li');
-        li.textContent = `• ${w}`;
-        weakList.appendChild(li);
-      });
-
-      document.getElementById('dp-recommendations').textContent = data.recommendations;
-      document.getElementById('deep-predictor-card').classList.remove('hidden');
-      document.getElementById('deep-predictor-card').scrollIntoView({ behavior: 'smooth' });
-    } catch(err) {
-      alert(err.message);
+      alert(data.message);
+      closeTrainingModal();
     }
-  }
-
-  async function runInstituteMatch() {
-    const payload = {
-      min_gpa: parseFloat(document.getElementById('inst-min-gpa').value),
-      target_dna: Array.from(selectedInstDna),
-      anonymize: document.getElementById('inst-anonymize').checked
-    };
-
-    try {
-      const res = await fetch('/api/match/institute', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      const data = await res.json();
-
-      const tbody = document.getElementById('inst-candidates-table');
-      tbody.innerHTML = '';
-
-      data.candidates.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-[var(--cream)]/50 transition";
-        tr.innerHTML = `
-          <td class="py-3.5 font-semibold text-[var(--ink)]">${c.name}</td>
-          <td class="py-3.5">${c.gpa}</td>
-          <td class="py-3.5">${c.sat} / ${c.act}</td>
-          <td class="py-3.5">${c.major}</td>
-          <td class="py-3.5 text-[var(--moss)]">${c.dna.join(', ')}</td>
-          <td class="py-3.5 text-right font-bold text-[var(--forest)]">${c.fit_score}%</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('inst-count').textContent = `${data.candidates.length} matching applicants`;
-    } catch(e) {}
-  }
-</script>
+  </script>
 </body>
 </html>
