@@ -41,8 +41,10 @@
 
       <div class="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--moss)]">
         <button onclick="openHowItWorksModal()" class="hover:text-[var(--ink)] transition">How it works</button>
-        <button onclick="switchMainView('institute')" id="nav-institute-btn" class="hover:text-[var(--ink)] transition">Institutions Portal</button>
-        <button onclick="openInsightsModal()" class="hover:text-[var(--ink)] transition">Insight & Strategy</button>
+        <span id="nav-app-links" class="hidden items-center gap-8">
+          <button onclick="switchMainView('institute')" id="nav-institute-btn" class="hover:text-[var(--ink)] transition">Institutions Portal</button>
+          <button onclick="openInsightsModal()" class="hover:text-[var(--ink)] transition">Insight & Strategy</button>
+        </span>
       </div>
 
       <div class="flex items-center gap-3">
@@ -63,6 +65,54 @@
     </div>
   </nav>
 
+  <section id="landing-page" class="max-w-[1400px] mx-auto px-6 lg:px-10 pt-16 pb-24">
+    <div class="grid lg:grid-cols-2 gap-14 items-center">
+      <div>
+        <p class="text-xs font-semibold tracking-[0.2em] text-[var(--moss)] uppercase mb-4">Applications, decided by data</p>
+        <h1 class="serif text-5xl sm:text-6xl leading-[1.05] font-medium tracking-tight mb-6">
+          Change the way<br>you choose your <em class="italic">college</em>
+        </h1>
+        <p class="text-[var(--moss)] text-base sm:text-lg leading-relaxed max-w-md mb-8">
+          UniMatch reads your academic profile against real institutional benchmarks and returns a ranked shortlist instantly — plus an AI advisor to sharpen every application.
+        </p>
+        <div class="flex flex-wrap items-center gap-4">
+          <button onclick="openAuthModal('signup')" class="px-7 py-3.5 text-sm font-semibold btn-primary rounded-full flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Get Started Free
+          </button>
+          <button onclick="openAuthModal('signin')" class="px-7 py-3.5 text-sm font-semibold text-[var(--ink)] border border-[var(--line)] bg-white hover:border-[var(--forest)] rounded-full transition">
+            Sign In
+          </button>
+        </div>
+        <p class="text-xs text-[var(--moss)] mt-4"><i class="fa-solid fa-lock mr-1"></i> Free account required to see your matches — takes under a minute.</p>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="fade-up bg-white border border-[var(--line)] rounded-2xl p-6 flex items-start gap-4">
+          <div class="w-11 h-11 shrink-0 rounded-full bg-[var(--forest)]/10 text-[var(--forest)] flex items-center justify-center"><i class="fa-solid fa-bullseye"></i></div>
+          <div>
+            <h3 class="serif text-base font-semibold mb-1">Instant college matching</h3>
+            <p class="text-xs text-[var(--moss)] leading-relaxed">Your GPA, test scores, and strengths mapped against real admissions benchmarks in seconds.</p>
+          </div>
+        </div>
+        <div class="fade-up bg-white border border-[var(--line)] rounded-2xl p-6 flex items-start gap-4" style="animation-delay:80ms">
+          <div class="w-11 h-11 shrink-0 rounded-full bg-[var(--amber)]/10 text-[var(--amber)] flex items-center justify-center"><i class="fa-solid fa-chart-pie"></i></div>
+          <div>
+            <h3 class="serif text-base font-semibold mb-1">Deep-dive fit analysis</h3>
+            <p class="text-xs text-[var(--moss)] leading-relaxed">Run an AI-powered audit on any single school to see your strengths, gaps, and next moves.</p>
+          </div>
+        </div>
+        <div class="fade-up bg-white border border-[var(--line)] rounded-2xl p-6 flex items-start gap-4" style="animation-delay:160ms">
+          <div class="w-11 h-11 shrink-0 rounded-full bg-[var(--rose)]/10 text-[var(--rose)] flex items-center justify-center"><i class="fa-solid fa-building-columns"></i></div>
+          <div>
+            <h3 class="serif text-base font-semibold mb-1">Built for institutions too</h3>
+            <p class="text-xs text-[var(--moss)] leading-relaxed">Admissions teams can filter and rank applicant pipelines with the same matching engine.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-content" class="hidden">
   <div class="bg-white border-b border-[var(--line)] py-3">
     <div class="max-w-[1400px] mx-auto px-6 lg:px-10 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -266,6 +316,7 @@
     </div>
 
   </main>
+  </div>
 
   <div id="modal-how" class="fixed inset-0 bg-[var(--ink)]/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-[var(--line)] rounded-2xl max-w-lg w-full p-8 shadow-2xl relative space-y-5">
@@ -464,15 +515,29 @@
   }
 
   function updateAuthUI() {
+    const landing = document.getElementById('landing-page');
+    const appContent = document.getElementById('app-content');
+    const navAppLinks = document.getElementById('nav-app-links');
+
     if (currentUser) {
       document.getElementById('auth-unauthenticated').classList.add('hidden');
       document.getElementById('auth-authenticated').classList.remove('hidden');
       document.getElementById('auth-authenticated').classList.add('flex');
       document.getElementById('user-display-name').textContent = currentUser.name || currentUser.email;
       document.getElementById('user-avatar').textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+
+      landing.classList.add('hidden');
+      appContent.classList.remove('hidden');
+      navAppLinks.classList.remove('hidden');
+      navAppLinks.classList.add('md:flex');
     } else {
       document.getElementById('auth-unauthenticated').classList.remove('hidden');
       document.getElementById('auth-authenticated').classList.add('hidden');
+
+      appContent.classList.add('hidden');
+      landing.classList.remove('hidden');
+      navAppLinks.classList.add('hidden');
+      navAppLinks.classList.remove('md:flex');
     }
   }
 
@@ -559,6 +624,7 @@
     currentUser = null;
     localStorage.removeItem('unimatch_user');
     updateAuthUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async function runStudentMatch() {
