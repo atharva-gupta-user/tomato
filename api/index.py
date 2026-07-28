@@ -10,8 +10,6 @@ from google.auth.transport import requests as google_requests
 # Initialize application environmental constraints
 load_dotenv()
 
-
-
 app = Flask(__name__, template_folder='../templates')
 app.secret_key = os.environ.get("SECRET_KEY", "unimatch-secret-key-2026")
 
@@ -114,7 +112,6 @@ def health_check():
 
 @app.route('/api/auth/signup', methods=['POST'])
 def auth_signup():
-    """Handles user sign-up using Supabase email/password auth."""
     data = request.json or {}
     email = data.get('email', '').strip()
     password = data.get('password', '').strip()
@@ -125,7 +122,7 @@ def auth_signup():
 
     if not supabase_client:
         return jsonify({
-            "message": "Sign up successful (Simulated Mode - configure SUPABASE_URL & SUPABASE_ANON_KEY for live DB).",
+            "message": "Sign up successful (Simulated Mode).",
             "user": {
                 "id": f"usr_{random.randint(1000, 9999)}",
                 "email": email,
@@ -137,11 +134,7 @@ def auth_signup():
         response = supabase_client.auth.sign_up({
             "email": email,
             "password": password,
-            "options": {
-                "data": {
-                    "full_name": name
-                }
-            }
+            "options": {"data": {"full_name": name}}
         })
         user = response.user
         session_data = response.session
@@ -159,7 +152,6 @@ def auth_signup():
 
 @app.route('/api/auth/login', methods=['POST'])
 def auth_login():
-    """Handles user sign-in using Supabase email/password auth."""
     data = request.json or {}
     email = data.get('email', '').strip()
     password = data.get('password', '').strip()
@@ -169,7 +161,7 @@ def auth_login():
 
     if not supabase_client:
         return jsonify({
-            "message": "Login successful (Simulated Mode - configure SUPABASE_URL & SUPABASE_ANON_KEY for live DB).",
+            "message": "Login successful (Simulated Mode).",
             "user": {
                 "id": f"usr_{random.randint(1000, 9999)}",
                 "email": email,
@@ -199,7 +191,6 @@ def auth_login():
 
 @app.route('/api/auth/google', methods=['POST'])
 def auth_google():
-    """Handles Google OAuth / Google Cloud Console ID token authentication."""
     data = request.json or {}
     token = data.get('token') or data.get('credential')
 
@@ -207,9 +198,8 @@ def auth_google():
         return jsonify({"error": "Google ID token or credential is required."}), 400
 
     if not GOOGLE_CLIENT_ID:
-        # Simulated mode for local/testing environments without a configured Google Client ID
         return jsonify({
-            "message": "Google authentication successful (Simulated Mode - configure GOOGLE_CLIENT_ID for live auth).",
+            "message": "Google authentication successful (Simulated Mode).",
             "user": {
                 "id": f"google_usr_{random.randint(1000, 9999)}",
                 "email": "google.user@example.com",
@@ -218,7 +208,6 @@ def auth_google():
             }
         }), 200
 
-    # Validate the ID token against the configured Google Client ID
     try:
         idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
     except Exception as e:
@@ -231,7 +220,6 @@ def auth_google():
         "picture": idinfo.get("picture")
     }
 
-    # Sync with Supabase if configured; fall back to the verified Google identity if this fails
     if supabase_client:
         try:
             res = supabase_client.auth.sign_in_with_id_token({
@@ -255,7 +243,6 @@ def auth_google():
 
 @app.route('/api/auth/logout', methods=['POST'])
 def auth_logout():
-    """Handles user logout."""
     if supabase_client:
         try:
             supabase_client.auth.sign_out()
@@ -265,7 +252,6 @@ def auth_logout():
 
 @app.route('/api/auth/user', methods=['GET'])
 def get_auth_user():
-    """Returns current user details based on session or Authorization token."""
     auth_header = request.headers.get('Authorization', '')
     token = auth_header.replace('Bearer ', '') if auth_header.startswith('Bearer ') else None
 
@@ -290,7 +276,6 @@ def get_auth_user():
 
 @app.route('/api/universities', methods=['GET'])
 def get_universities():
-    """Returns a list of all raw university names."""
     return jsonify({
         "universities": [uni['name'] for uni in UNIVERSITIES]
     }), 200
@@ -378,7 +363,6 @@ def match_institute():
 
 @app.route('/api/advisor/profile', methods=['POST'])
 def profile_optimizer():
-    """Generates personalized tactical advice using the active Groq inference engine."""
     data = request.json or {}
     university = data.get('university', 'Target Institution')
     tier = data.get('tier', 'Target')
@@ -397,7 +381,6 @@ def profile_optimizer():
     )
 
     if not groq_client:
-        # High-Fidelity local fallback simulation if no environmental key present
         return jsonify({
             "advice": f"Your current metrics match the baseline, but your profile lacks dedicated alignment with institutional targets at {university}. Adding a regional leadership role or an advanced independent research project could boost your relative target baseline by an estimated 12% to 15%."
         })
@@ -415,7 +398,6 @@ def profile_optimizer():
 
 @app.route('/api/advisor/predict', methods=['POST'])
 def college_predictor():
-    """Evaluates student compatibility directly against a chosen college using continuous proportional evaluation."""
     data = request.json or {}
     uni_name = data.get('university', '')
     gpa = float(data.get('gpa', 3.0))
@@ -431,7 +413,6 @@ def college_predictor():
     strengths = []
     weaknesses = []
 
-    # Calculate proportional dynamic scoring to prevent rigid steps like 50% or 100%
     gpa_ratio = min(1.15, gpa / uni['min_gpa']) if uni['min_gpa'] else 1.0
     gpa_score = min(40.0, gpa_ratio * 40.0)
 
@@ -441,7 +422,6 @@ def college_predictor():
     act_ratio = min(1.15, act / uni['avg_act']) if uni['avg_act'] else 1.0
     act_score = min(30.0, act_ratio * 30.0)
 
-    # Strengths and Weaknesses Evaluation (Qualitative)
     if gpa >= uni['min_gpa']:
         strengths.append(f"Unweighted GPA of {gpa} fulfills or surpasses the minimum institutional metric requirement ({uni['min_gpa']}).")
     else:
@@ -457,14 +437,12 @@ def college_predictor():
     else:
         weaknesses.append(f"ACT evaluation ({act}) drops below the institution's historical student cohort average of {uni['avg_act']}.")
 
-    # Pipeline/Major Weighting
     major_score = 10.0 if major in uni['majors'] else (gpa_ratio * 4.0)
     if major in uni['majors']:
         strengths.append(f"Your specialized interest in '{major}' directly overlaps signature pipelines.")
     else:
         weaknesses.append(f"Desired major specialization is not currently highlighted as a core signature major pipeline.")
 
-    # Extracurricular DNA analysis (Up to 15 points)
     dna_overlap = list(set(selected_dna) & set(uni['dna']))
     dna_score = min(15.0, len(dna_overlap) * 5.0)
     
@@ -473,7 +451,6 @@ def college_predictor():
     else:
         weaknesses.append(f"Extracurricular footprint does not showcase core cultural alignments of {', '.join(uni['dna'])}.")
 
-    # Normalize proportional summation to 0-100% boundary
     raw_score = gpa_score + sat_score + act_score + major_score + dna_score
     total_score = min(99, max(5, int((raw_score / 125.0) * 100)))
 
@@ -493,7 +470,6 @@ def college_predictor():
     )
 
     if not groq_client:
-        # Static analytics recommendations based on parameters (High-Fidelity fallback)
         fallback_recs = [
             f"Target and cultivate additional DNA profile markers to closely map to {uni['name']}'s signature values: {', '.join(uni['dna'])}."
         ]
@@ -527,7 +503,6 @@ def college_predictor():
 
 @app.route('/api/advisor/outreach', methods=['POST'])
 def outreach_strategy():
-    """Builds an algorithmic recruitment summary outlining general strategy insights."""
     data = request.json or {}
     min_gpa = data.get('min_gpa', 3.5)
     target_dna = data.get('target_dna', [])
