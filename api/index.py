@@ -54,7 +54,7 @@ def index():
 def match_colleges():
     data = request.json or {}
     
-    # Validation constraints bound to actual academic ranges
+    # Validation constraints bound to actual academic ranges to prevent extreme inputs like 99999999
     try:
         gpa = max(0.0, min(4.0, float(data.get('gpa', 3.5))))
         sat = max(400, min(1600, int(data.get('sat', 1400))))
@@ -145,7 +145,7 @@ def match_institute():
                 filtered_candidates.append(cand_copy)
 
     # Dataset context injected into the AI training loop
-    dataset_context = f"Active Institutional Pool Datapoints: {len(INSTITUTIONAL_CANDIDATES)} candidates indexed across universities including MIT, Stanford, Caltech."
+    dataset_context = f"Active Institutional Pool Datapoints: {len(INSTITUTIONAL_CANDIDATES)} candidates indexed across universities including MIT, Stanford, Caltech with GPA range [0.0-4.0] and SAT range [400-1600]."
 
     prompt = (
         f"Context: You are an expert AI/ML Higher-Education Solutions Architect advising an admissions team.\n"
