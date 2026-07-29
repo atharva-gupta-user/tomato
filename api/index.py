@@ -54,23 +54,23 @@ random.seed(42)
 # Mock data
 # ---------------------------------------------------------------------------
 UNIVERSITIES = [
-    {"id": 1, "name": "MIT", "min_gpa": 3.8, "avg_sat": 1520, "avg_act": 35,
-     "tuition": "$58,000", "acceptance": "4%", "region": "Northeast", "campus_type": "Urban",
+    {"id": 1, "name": "MIT", "city": "Cambridge", "state": "Massachusetts", "min_gpa": 3.8, "avg_sat": 1520, "avg_act": 35,
+     "tuition": "$58,000", "tuition_cost": 58000, "acceptance": "4%", "region": "Northeast", "campus_type": "Urban",
      "dna_tags": ["STEM", "Research", "Innovation"]},
-    {"id": 2, "name": "Stanford University", "min_gpa": 3.85, "avg_sat": 1510, "avg_act": 34,
-     "tuition": "$61,000", "acceptance": "3.9%", "region": "West", "campus_type": "Suburban",
+    {"id": 2, "name": "Stanford University", "city": "Stanford", "state": "California", "min_gpa": 3.85, "avg_sat": 1510, "avg_act": 34,
+     "tuition": "$61,000", "tuition_cost": 61000, "acceptance": "3.9%", "region": "West", "campus_type": "Suburban",
      "dna_tags": ["STEM", "Innovation", "Leadership"]},
-    {"id": 3, "name": "UC Berkeley", "min_gpa": 3.65, "avg_sat": 1410, "avg_act": 31,
-     "tuition": "$44,000", "acceptance": "11.4%", "region": "West", "campus_type": "Urban",
+    {"id": 3, "name": "UC Berkeley", "city": "Berkeley", "state": "California", "min_gpa": 3.65, "avg_sat": 1410, "avg_act": 31,
+     "tuition": "$44,000", "tuition_cost": 44000, "acceptance": "11.4%", "region": "West", "campus_type": "Urban",
      "dna_tags": ["Community Service", "Research", "STEM"]},
-    {"id": 4, "name": "Carnegie Mellon", "min_gpa": 3.75, "avg_sat": 1500, "avg_act": 34,
-     "tuition": "$62,000", "acceptance": "11%", "region": "Northeast", "campus_type": "Urban",
+    {"id": 4, "name": "Carnegie Mellon", "city": "Pittsburgh", "state": "Pennsylvania", "min_gpa": 3.75, "avg_sat": 1500, "avg_act": 34,
+     "tuition": "$62,000", "tuition_cost": 62000, "acceptance": "11%", "region": "Northeast", "campus_type": "Urban",
      "dna_tags": ["STEM", "Innovation", "Research"]},
-    {"id": 5, "name": "Harvard University", "min_gpa": 3.9, "avg_sat": 1540, "avg_act": 35,
-     "tuition": "$56,000", "acceptance": "3.4%", "region": "Northeast", "campus_type": "Urban",
+    {"id": 5, "name": "Harvard University", "city": "Cambridge", "state": "Massachusetts", "min_gpa": 3.9, "avg_sat": 1540, "avg_act": 35,
+     "tuition": "$56,000", "tuition_cost": 56000, "acceptance": "3.4%", "region": "Northeast", "campus_type": "Urban",
      "dna_tags": ["Leadership", "Community Service", "Arts"]},
-    {"id": 6, "name": "Caltech", "min_gpa": 3.9, "avg_sat": 1560, "avg_act": 36,
-     "tuition": "$60,000", "acceptance": "2.7%", "region": "West", "campus_type": "Suburban",
+    {"id": 6, "name": "Caltech", "city": "Pasadena", "state": "California", "min_gpa": 3.9, "avg_sat": 1560, "avg_act": 36,
+     "tuition": "$60,000", "tuition_cost": 60000, "acceptance": "2.7%", "region": "West", "campus_type": "Suburban",
      "dna_tags": ["STEM", "Research", "Innovation"]},
 ]
 
@@ -94,11 +94,12 @@ def _parse_profile(data):
     gpa = _clamp(float(data.get('gpa', 3.5) or 3.5), 0.0, 4.0)
     sat = int(_clamp(float(data.get('sat', 1400) or 1400), 400, 1600))
     act = int(_clamp(float(data.get('act', 30) or 30), 1, 36))
-    return gpa, sat, act
+    budget = int(_clamp(float(data.get('budget', 70000) or 70000), 10000, 100000))
+    return gpa, sat, act, budget
 
 
-def _score_university(u, gpa, sat, act, dna_tags):
-    score = 40
+def _score_university(u, gpa, sat, act, dna_tags, budget):
+    score = 35
     if gpa >= u['min_gpa']:
         score += 20
     elif gpa >= u['min_gpa'] - 0.15:
@@ -113,6 +114,13 @@ def _score_university(u, gpa, sat, act, dna_tags):
         score += 5
     overlap = len(set(dna_tags) & set(u['dna_tags']))
     score += min(overlap * 5, 15)
+    
+    # Budget preference matching
+    if u['tuition_cost'] <= budget:
+        score += 5
+    else:
+        score -= 10
+
     return int(_clamp(score, 20, 98))
 
 
@@ -124,7 +132,7 @@ def _tier_for_score(score):
     return "Reach", "rose"
 
 
-def _reasoning_for(u, gpa, sat, act, dna_tags, score):
+def _reasoning_for(u, gpa, sat, act, dna_tags, score, budget):
     gpa_delta = round(gpa - u['min_gpa'], 2)
     sat_delta = sat - u['avg_sat']
     overlap = sorted(set(dna_tags) & set(u['dna_tags']))
@@ -133,6 +141,10 @@ def _reasoning_for(u, gpa, sat, act, dna_tags, score):
     bits.append(f"SAT is {'at/above' if sat_delta >= 0 else 'below'} their average by {abs(sat_delta)} points.")
     if overlap:
         bits.append(f"Shared strengths: {', '.join(overlap)}.")
+    if u['tuition_cost'] <= budget:
+        bits.append(f"Tuition ({u['tuition']}) fits within your specified budget.")
+    else:
+        bits.append(f"Tuition ({u['tuition']}) exceeds your specified budget.")
     return " ".join(bits)
 
 
@@ -145,7 +157,6 @@ def _score_candidate(c, min_gpa, target_dna):
         score += min(overlap * 12, 24)
     else:
         score += 10
-    # small deterministic jitter for variety, seeded so results are stable
     score += random.Random(c['id']).randint(-3, 3)
     return int(_clamp(score, 40, 99))
 
@@ -177,7 +188,7 @@ def list_universities():
 def match_student():
     data = request.json or {}
     try:
-        gpa, sat, act = _parse_profile(data)
+        gpa, sat, act, budget = _parse_profile(data)
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid numerical parameters supplied for academic credentials."}), 400
 
@@ -187,8 +198,7 @@ def match_student():
 
     matches = []
     for u in UNIVERSITIES:
-        score = _score_university(u, gpa, sat, act, dna_tags)
-        # small nudge for matching stated preferences, doesn't gate results
+        score = _score_university(u, gpa, sat, act, dna_tags, budget)
         if region_pref and region_pref == u['region']:
             score = int(_clamp(score + 3, 20, 99))
         if campus_pref and campus_pref == u['campus_type']:
@@ -197,12 +207,16 @@ def match_student():
         tier, color = _tier_for_score(score)
         matches.append({
             "university": u['name'],
+            "city": u['city'],
+            "state": u['state'],
+            "tuition": u['tuition'],
+            "tuition_cost": u['tuition_cost'],
             "probability": score,
             "tier": tier,
             "color": color,
             "region": u['region'],
             "campus_type": u['campus_type'],
-            "reasoning": _reasoning_for(u, gpa, sat, act, dna_tags, score),
+            "reasoning": _reasoning_for(u, gpa, sat, act, dna_tags, score, budget),
         })
 
     matches.sort(key=lambda m: m['probability'], reverse=True)
@@ -216,7 +230,7 @@ def match_student():
 def advisor_predict():
     data = request.json or {}
     try:
-        gpa, sat, act = _parse_profile(data)
+        gpa, sat, act, budget = _parse_profile(data)
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid profile metrics."}), 400
 
@@ -228,7 +242,7 @@ def advisor_predict():
     if not u:
         return jsonify({"error": f"Unknown university '{university_name}'."}), 404
 
-    score = _score_university(u, gpa, sat, act, dna_tags)
+    score = _score_university(u, gpa, sat, act, dna_tags, budget)
     tier, _ = _tier_for_score(score)
 
     strengths = []
@@ -249,6 +263,11 @@ def advisor_predict():
     else:
         weaknesses.append(f"ACT of {act} is below the {u['avg_act']} average")
 
+    if u['tuition_cost'] <= budget:
+        strengths.append(f"Annual tuition of {u['tuition']} fits within your target budget")
+    else:
+        weaknesses.append(f"Annual tuition of {u['tuition']} exceeds your target budget")
+
     overlap = sorted(set(dna_tags) & set(u['dna_tags']))
     missing = sorted(set(u['dna_tags']) - set(dna_tags))
     if overlap:
@@ -263,8 +282,8 @@ def advisor_predict():
 
     prompt = (
         f"Context: You are an expert admissions advisor.\n"
-        f"Candidate: GPA {gpa}/4.0, SAT {sat}/1600, ACT {act}/36, target major {major}.\n"
-        f"Target Institution: {u['name']} (min GPA {u['min_gpa']}, avg SAT {u['avg_sat']}, avg ACT {u['avg_act']}, "
+        f"Candidate: GPA {gpa}/4.0, SAT {sat}/1600, ACT {act}/36, budget ${budget}, target major {major}.\n"
+        f"Target Institution: {u['name']} located in {u['city']}, {u['state']} (Tuition {u['tuition']}, min GPA {u['min_gpa']}, avg SAT {u['avg_sat']}, avg ACT {u['avg_act']}, "
         f"acceptance rate {u['acceptance']}).\n"
         f"Task: In 2-3 concise sentences, give the single highest-leverage recommendation to improve this "
         f"candidate's admission odds at {u['name']}. Be specific and actionable."
@@ -290,6 +309,9 @@ def advisor_predict():
 
     return jsonify({
         "university": u['name'],
+        "city": u['city'],
+        "state": u['state'],
+        "tuition": u['tuition'],
         "match_score": score,
         "tier": tier,
         "strengths": strengths,
@@ -383,11 +405,6 @@ def advisor_outreach():
 
 # ---------------------------------------------------------------------------
 # Auth
-#
-# When SUPABASE_URL / SUPABASE_ANON_KEY are configured, real accounts are
-# created and verified through Supabase Auth. Without those env vars the app
-# runs in "demo mode": sign in/up simply issues a signed session cookie so
-# the UI is fully functional out of the box, with no external dependency.
 # ---------------------------------------------------------------------------
 @app.route('/api/auth/signup', methods=['POST'])
 def auth_signup():
@@ -462,8 +479,6 @@ def auth_google():
         except Exception as e:
             return jsonify({"error": f"Google sign-in verification failed: {e}"}), 401
     else:
-        # No credential / no configured Google client -> demo fallback used
-        # by the "Continue with Google" button when the SDK can't load.
         user = {"id": "demo-google-user", "name": "Demo Student", "email": "demo.student@unimatch.dev"}
 
     session['user'] = user
