@@ -73,7 +73,7 @@
           Change the way<br>you choose your <em class="italic">college</em>
         </h1>
         <p class="text-[var(--moss)] text-base sm:text-lg leading-relaxed max-w-md mb-8">
-          UniMatch reads your academic profile against real institutional benchmarks and returns a ranked shortlist instantly — plus an AI advisor to sharpen every application.
+          UniMatch reads your academic profile and budget preferences against real institutional benchmarks and returns a ranked shortlist instantly — plus an AI advisor to sharpen every application.
         </p>
         <div class="flex flex-wrap items-center gap-4">
           <button onclick="openAuthModal('signup')" class="px-7 py-3.5 text-sm font-semibold btn-primary rounded-full flex items-center gap-2">
@@ -91,14 +91,14 @@
           <div class="w-11 h-11 shrink-0 rounded-full bg-[var(--forest)]/10 text-[var(--forest)] flex items-center justify-center"><i class="fa-solid fa-bullseye"></i></div>
           <div>
             <h3 class="serif text-base font-semibold mb-1">Instant college matching</h3>
-            <p class="text-xs text-[var(--moss)] leading-relaxed">Your GPA, test scores, and strengths mapped against real admissions benchmarks in seconds.</p>
+            <p class="text-xs text-[var(--moss)] leading-relaxed">Your GPA, test scores, budget, and strengths mapped against real admissions benchmarks in seconds.</p>
           </div>
         </div>
         <div class="fade-up bg-white border border-[var(--line)] rounded-2xl p-6 flex items-start gap-4" style="animation-delay:80ms">
           <div class="w-11 h-11 shrink-0 rounded-full bg-[var(--amber)]/10 text-[var(--amber)] flex items-center justify-center"><i class="fa-solid fa-chart-pie"></i></div>
           <div>
             <h3 class="serif text-base font-semibold mb-1">Deep-dive fit analysis</h3>
-            <p class="text-xs text-[var(--moss)] leading-relaxed">Run an AI-powered audit on any single school to see your strengths, gaps, and next moves.</p>
+            <p class="text-xs text-[var(--moss)] leading-relaxed">Run an AI-powered audit on any single school to see your strengths, gaps, tuition fit, and next moves.</p>
           </div>
         </div>
         <div class="fade-up bg-white border border-[var(--line)] rounded-2xl p-6 flex items-start gap-4" style="animation-delay:160ms">
@@ -138,7 +138,7 @@
         </h1>
       </div>
       <p id="hero-desc" class="text-[var(--moss)] text-base sm:text-lg leading-relaxed max-w-md lg:justify-self-end">
-        Enter your academic profile on the left. Our matching engine reads it against 20 institutional archetypes and returns a ranked shortlist instantly.
+        Enter your academic profile and budget on the left. Our matching engine reads it against institutional archetypes and returns a ranked shortlist instantly.
       </p>
     </div>
   </header>
@@ -165,6 +165,11 @@
               <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">ACT</label>
               <input type="number" min="1" max="36" id="act" value="31" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
             </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--moss)] uppercase tracking-wider mb-1.5">Max Annual Budget ($)</label>
+            <input type="number" step="1000" min="10000" max="100000" id="budget" value="65000" class="input-field w-full rounded-lg px-3.5 py-2.5 text-sm">
           </div>
 
           <div>
@@ -235,9 +240,11 @@
             <div>
               <span class="text-xs font-semibold uppercase tracking-wider text-[var(--moss)]">Deep Institutional Audit</span>
               <h4 id="dp-uni-title" class="serif text-xl font-semibold">University Name</h4>
+              <p id="dp-uni-location" class="text-xs text-[var(--moss)] mt-0.5">City, State</p>
             </div>
             <div class="text-right">
               <span id="dp-score-badge" class="px-3 py-1 rounded-full text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">92% Match</span>
+              <p id="dp-tuition" class="text-xs text-[var(--moss)] mt-1">Tuition: $0</p>
             </div>
           </div>
 
@@ -323,7 +330,7 @@
       <button onclick="closeModal('modal-how')" class="absolute top-5 right-5 text-[var(--moss)] hover:text-[var(--ink)] text-lg"><i class="fa-solid fa-xmark"></i></button>
       <h3 class="serif text-2xl font-semibold">How UniMatch Works</h3>
       <div class="space-y-3 text-xs text-[var(--moss)] leading-relaxed">
-        <p><strong class="text-[var(--ink)]">1. Multi-Factor Calibration:</strong> UniMatch maps student academic profiles against real institutional admission baselines including historical GPA floors and test score mid-ranges.</p>
+        <p><strong class="text-[var(--ink)]">1. Multi-Factor Calibration:</strong> UniMatch maps student academic profiles against real institutional admission baselines including historical GPA floors, test score mid-ranges, and tuition costs.</p>
         <p><strong class="text-[var(--ink)]">2. DNA Matching Matrix:</strong> Beyond numbers, our engine evaluates student extracurricular archetypes (STEM, Leadership, Research, Arts) to quantify institutional cultural fit.</p>
         <p><strong class="text-[var(--ink)]">3. AI-Powered Advisory:</strong> Integrated LLM inference pipelines evaluate student credentials in real-time to provide tactical suggestions for boosting admission success probability.</p>
       </div>
@@ -390,7 +397,7 @@
 
       <div class="flex flex-col items-center">
         <div id="google-signin-btn"></div>
-        <button id="google-fallback-btn" onclick="handleGoogleFallback()" class="w-full bg-[var(--cream)] hover:bg-[var(--line)] text-[var(--ink)] border border-[var(--line)] font-medium py-2.5 px-4 rounded-full flex items-center justify-center gap-3 transition {{ 'hidden' if google_client_id else '' }}">
+        <button id="google-fallback-btn" onclick="handleGoogleFallback()" class="w-full bg-[var(--cream)] hover:bg-[var(--line)] text-[var(--ink)] border border-[var(--line)] font-medium py-2.5 px-4 rounded-full flex items-center justify-center gap-3 transition">
           <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
           Continue with Google
         </button>
@@ -426,7 +433,7 @@
       runInstituteMatch();
     } else {
       document.getElementById('hero-title').innerHTML = `Change the way<br>you choose your <em class="italic">college</em>`;
-      document.getElementById('hero-desc').textContent = `Enter your academic profile on the left. Our matching engine reads it against 20 institutional archetypes and returns a ranked shortlist instantly.`;
+      document.getElementById('hero-desc').textContent = `Enter your academic profile and budget on the left. Our matching engine reads it against institutional archetypes and returns a ranked shortlist instantly.`;
     }
   }
 
@@ -632,6 +639,7 @@
       gpa: parseFloat(document.getElementById('gpa').value),
       sat: parseInt(document.getElementById('sat').value),
       act: parseInt(document.getElementById('act').value),
+      budget: parseInt(document.getElementById('budget').value),
       major: document.getElementById('major').value,
       region: document.getElementById('region').value,
       campus_type: document.getElementById('campus_type').value,
@@ -658,11 +666,15 @@
         card.style.animationDelay = `${i * 40}ms`;
         card.innerHTML = `
           <div class="flex items-start justify-between gap-3">
-            <h4 class="serif text-lg font-semibold leading-snug">${m.university}</h4>
+            <div>
+              <h4 class="serif text-lg font-semibold leading-snug">${m.university}</h4>
+              <p class="text-xs text-[var(--moss)] mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${m.city}, ${m.state}</p>
+            </div>
             <span class="shrink-0 text-[11px] px-2.5 py-1 rounded-full border font-semibold ${tierClass[m.color] || 'tier-target'}">${m.tier}</span>
           </div>
           <div class="text-xs text-[var(--moss)] space-y-1.5">
-            <p><i class="fa-solid fa-location-dot w-4"></i> ${m.region} · ${m.campus_type}</p>
+            <p><i class="fa-solid fa-compass w-4"></i> ${m.region} · ${m.campus_type}</p>
+            <p><i class="fa-solid fa-money-bill-wave w-4"></i> Annual Tuition: <strong class="text-[var(--ink)]">${m.tuition}</strong></p>
             <p><i class="fa-solid fa-chart-line w-4"></i> Admit likelihood: <strong class="text-[var(--ink)]">${m.probability}%</strong></p>
           </div>
           <p class="text-xs text-[var(--ink)]/70 italic border-t border-[var(--line)] pt-3">${m.reasoning}</p>
@@ -685,6 +697,7 @@
       gpa: parseFloat(document.getElementById('gpa').value),
       sat: parseInt(document.getElementById('sat').value),
       act: parseInt(document.getElementById('act').value),
+      budget: parseInt(document.getElementById('budget').value),
       major: document.getElementById('major').value,
       dna: Array.from(selectedDna)
     };
@@ -695,7 +708,9 @@
       if(!res.ok) throw new Error(data.error || 'Prediction failed');
 
       document.getElementById('dp-uni-title').textContent = data.university;
+      document.getElementById('dp-uni-location').textContent = `${data.city}, ${data.state}`;
       document.getElementById('dp-score-badge').textContent = `${data.match_score}% Fit Score (${data.tier})`;
+      document.getElementById('dp-tuition').textContent = `Tuition: ${data.tuition}`;
       
       const strengthsList = document.getElementById('dp-strengths');
       strengthsList.innerHTML = '';
